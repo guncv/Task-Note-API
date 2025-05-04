@@ -36,6 +36,9 @@ func RegisterRoutes(e *gin.Engine, c *dig.Container) {
 
 func taskRoutes(eg *gin.RouterGroup, taskController *controllers.TaskController) {
 	tasks := eg.Group("/tasks")
-	tasks.GET("/health", taskController.HealthCheck)
-	// Add more task-related routes here
+	tasks.POST("", taskController.CreateTask)
+}
+
+func userRoutes(eg *gin.RouterGroup, userController *controllers.UserController) {
+	// users := eg.Group("/users")
 }
