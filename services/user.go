@@ -2,6 +2,7 @@ package services
 
 import (
 	"github.com/guncv/tech-exam-software-engineering/infras/log"
+	"github.com/guncv/tech-exam-software-engineering/models"
 	"github.com/guncv/tech-exam-software-engineering/repositories"
 )
 
@@ -18,4 +19,8 @@ func NewUserService(repo repositories.IUserRepository, log *log.Logger) *UserSer
 		repo: repo,
 		log:  log,
 	}
+}
+
+func (s *UserService) RegisterUser(user *models.User) error {
+	return s.repo.RegisterUser(user)
 }
