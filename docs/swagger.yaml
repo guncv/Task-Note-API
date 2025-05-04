@@ -1,0 +1,27 @@
+basePath: /api/v1
+definitions:
+  entities.GetHealthUserResponse:
+    properties:
+      status:
+        type: string
+    type: object
+host: localhost:8080
+info:
+  contact: {}
+  description: This is a sample Hugeman Assignment backend using Go and Swagger. The
+    project serves as a backend API for managing tasks and users.
+  title: Tech Exam Hugeman Assignment API
+  version: "1"
+paths:
+  /v1/health:
+    get:
+      description: Returns status
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/entities.GetHealthUserResponse'
+      summary: Health Check
+      tags:
+      - Health
+swagger: "2.0"

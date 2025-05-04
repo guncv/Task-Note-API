@@ -1,0 +1,37 @@
+version: "3.8"
+
+services:
+  postgres:
+    image: postgres:12-alpine
+    container_name: task-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: task-note
+    ports:
+      - "5432:5432"
+    networks:
+      - task-network
+
+  api:
+    container_name: task-api
+    build:
+      context: .
+      dockerfile: Dockerfile.local
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+    environment:
+      ENV: local
+      GIN_MODE: release
+      DB_SOURCE: postgresql://user:password@task-db:5432/task-note?sslmode=disable
+    depends_on:
+      - postgres
+    networks:
+      - task-network
+    entrypoint: ["/app/migration.sh", "task-db:5432", "--"]
+    command: ["/app/main"]
+
+networks:
+  task-network:
