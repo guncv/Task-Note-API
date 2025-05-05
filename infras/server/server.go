@@ -11,12 +11,14 @@ import (
 	"github.com/guncv/tech-exam-software-engineering/config"
 	constants "github.com/guncv/tech-exam-software-engineering/constant"
 	"github.com/guncv/tech-exam-software-engineering/infras/routes"
+	"github.com/guncv/tech-exam-software-engineering/utils"
 	"go.uber.org/dig"
 )
 
 type GinServer struct {
-	Router    *gin.Engine
-	AppConfig *config.AppConfig
+	Router     *gin.Engine
+	AppConfig  *config.AppConfig
+	TokenMaker utils.IPasetoMaker
 }
 
 func (s *GinServer) Start() error {
@@ -29,12 +31,18 @@ func NewGinServer(c *config.Config, diContainer *dig.Container) *GinServer {
 
 	RegisterCustomValidations()
 
-	s := &GinServer{
-		Router:    router,
-		AppConfig: &c.AppConfig,
+	tokenMaker, err := utils.NewPasetoMaker(c)
+	if err != nil {
+		panic(err)
 	}
 
-	routes.RegisterRoutes(router, diContainer)
+	s := &GinServer{
+		Router:     router,
+		AppConfig:  &c.AppConfig,
+		TokenMaker: tokenMaker,
+	}
+
+	routes.RegisterRoutes(router, diContainer, s.TokenMaker)
 	return s
 }
 

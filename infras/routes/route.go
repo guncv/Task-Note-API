@@ -6,12 +6,14 @@ import (
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"github.com/guncv/tech-exam-software-engineering/controllers"
+	"github.com/guncv/tech-exam-software-engineering/middleware"
+	"github.com/guncv/tech-exam-software-engineering/utils"
 	swaggerFiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
 	"go.uber.org/dig"
 )
 
-func RegisterRoutes(e *gin.Engine, c *dig.Container) {
+func RegisterRoutes(e *gin.Engine, c *dig.Container, tokenMaker utils.IPasetoMaker) {
 
 	e.Use(cors.New(cors.Config{
 		AllowOrigins:     []string{"http://localhost:3000"},
@@ -32,7 +34,11 @@ func RegisterRoutes(e *gin.Engine, c *dig.Container) {
 		api.GET("/health", taskController.HealthCheck)
 
 		userRoutes(api, userController)
-		taskRoutes(api, taskController)
+
+		// Auth Middleware Routes
+		authRoutes := api.Group("/").Use(middleware.AuthMiddleware(tokenMaker))
+
+		taskRoutes(authRoutes.(*gin.RouterGroup), taskController)
 	}); err != nil {
 		panic(err)
 	}
