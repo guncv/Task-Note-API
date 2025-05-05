@@ -5,6 +5,7 @@ package mocks
 import (
 	context "context"
 
+	models "github.com/guncv/tech-exam-software-engineering/models"
 	mock "github.com/stretchr/testify/mock"
 )
 
@@ -19,6 +20,65 @@ type MockITaskRepository_Expecter struct {
 
 func (_m *MockITaskRepository) EXPECT() *MockITaskRepository_Expecter {
 	return &MockITaskRepository_Expecter{mock: &_m.Mock}
+}
+
+// CreateTask provides a mock function with given fields: ctx, task
+func (_m *MockITaskRepository) CreateTask(ctx context.Context, task *models.Task) (*models.Task, error) {
+	ret := _m.Called(ctx, task)
+
+	if len(ret) == 0 {
+		panic("no return value specified for CreateTask")
+	}
+
+	var r0 *models.Task
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, *models.Task) (*models.Task, error)); ok {
+		return rf(ctx, task)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, *models.Task) *models.Task); ok {
+		r0 = rf(ctx, task)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*models.Task)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, *models.Task) error); ok {
+		r1 = rf(ctx, task)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// MockITaskRepository_CreateTask_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'CreateTask'
+type MockITaskRepository_CreateTask_Call struct {
+	*mock.Call
+}
+
+// CreateTask is a helper method to define mock.On call
+//   - ctx context.Context
+//   - task *models.Task
+func (_e *MockITaskRepository_Expecter) CreateTask(ctx interface{}, task interface{}) *MockITaskRepository_CreateTask_Call {
+	return &MockITaskRepository_CreateTask_Call{Call: _e.mock.On("CreateTask", ctx, task)}
+}
+
+func (_c *MockITaskRepository_CreateTask_Call) Run(run func(ctx context.Context, task *models.Task)) *MockITaskRepository_CreateTask_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(context.Context), args[1].(*models.Task))
+	})
+	return _c
+}
+
+func (_c *MockITaskRepository_CreateTask_Call) Return(_a0 *models.Task, _a1 error) *MockITaskRepository_CreateTask_Call {
+	_c.Call.Return(_a0, _a1)
+	return _c
+}
+
+func (_c *MockITaskRepository_CreateTask_Call) RunAndReturn(run func(context.Context, *models.Task) (*models.Task, error)) *MockITaskRepository_CreateTask_Call {
+	_c.Call.Return(run)
+	return _c
 }
 
 // HealthCheck provides a mock function with given fields: ctx

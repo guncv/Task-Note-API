@@ -24,14 +24,14 @@ func (s *GinServer) Start() error {
 	return s.Router.Run(addr)
 }
 
-func NewGinServer(c *config.AppConfig, diContainer *dig.Container) *GinServer {
+func NewGinServer(c *config.Config, diContainer *dig.Container) *GinServer {
 	router := gin.Default()
 
 	RegisterCustomValidations()
 
 	s := &GinServer{
 		Router:    router,
-		AppConfig: c,
+		AppConfig: &c.AppConfig,
 	}
 
 	routes.RegisterRoutes(router, diContainer)

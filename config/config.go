@@ -3,14 +3,21 @@ package config
 import (
 	"log"
 	"os"
+	"time"
 
 	"github.com/spf13/viper"
 )
 
+type Config struct {
+	AppConfig   AppConfig   `mapstructure:"AppConfig"`
+	TokenConfig TokenConfig `mapstructure:"TokenConfig"`
+	Database    Postgres    `mapstructure:"Database"`
+}
+
 type AppConfig struct {
-	AppPort  string   `mapstructure:"APP_PORT"`
-	AppEnv   string   `mapstructure:"APP_ENV"`
-	Database Postgres `mapstructure:"Database"`
+	AppPort           string `mapstructure:"APP_PORT"`
+	AppEnv            string `mapstructure:"APP_ENV"`
+	TokenSymmetricKey string `mapstructure:"TOKEN_SYMMETRIC_KEY"`
 }
 
 type Postgres struct {
@@ -21,7 +28,12 @@ type Postgres struct {
 	DbName   string `mapstructure:"POSTGRES_DB"`
 }
 
-func LoadConfig() (*AppConfig, error) {
+type TokenConfig struct {
+	TokenSymmetricKey   string        `mapstructure:"TOKEN_SYMMETRIC_KEY"`
+	AccessTokenDuration time.Duration `mapstructure:"ACCESS_TOKEN_DURATION"`
+}
+
+func LoadConfig() (*Config, error) {
 
 	env := os.Getenv("ENV")
 	if env == "" {
@@ -39,7 +51,7 @@ func LoadConfig() (*AppConfig, error) {
 		return nil, err
 	}
 
-	var config AppConfig
+	var config Config
 	if err := viper.Unmarshal(&config); err != nil {
 		log.Fatalf("Unable to unmarshal config: %v", err)
 		return nil, err

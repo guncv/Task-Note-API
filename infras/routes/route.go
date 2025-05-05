@@ -24,11 +24,15 @@ func RegisterRoutes(e *gin.Engine, c *dig.Container) {
 
 	e.GET("/api/v1/docs/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
-	if err := c.Invoke(func(h *controllers.TaskController) {
+	if err := c.Invoke(func(
+		taskController *controllers.TaskController,
+		userController *controllers.UserController,
+	) {
 		api := e.Group("/api/v1")
-		api.GET("/health", h.HealthCheck)
+		api.GET("/health", taskController.HealthCheck)
 
-		taskRoutes(api, h)
+		userRoutes(api, userController)
+		taskRoutes(api, taskController)
 	}); err != nil {
 		panic(err)
 	}
@@ -40,5 +44,7 @@ func taskRoutes(eg *gin.RouterGroup, taskController *controllers.TaskController)
 }
 
 func userRoutes(eg *gin.RouterGroup, userController *controllers.UserController) {
-	// users := eg.Group("/users")
+	users := eg.Group("/users")
+	users.POST("", userController.Register)
+	users.POST("/login", userController.Login)
 }

@@ -9,13 +9,13 @@ import (
 
 func (c *Container) InfraStructureProvider() {
 
-	c.Container.Provide(func(cfg *config.AppConfig) *log.Logger {
-		return log.Initialize(cfg.AppEnv)
+	c.Container.Provide(func(cfg *config.Config) *log.Logger {
+		return log.Initialize(cfg.AppConfig.AppEnv)
 	})
 
 	c.Container.Provide(database.ConnectPostgres)
 
-	if err := c.Container.Provide(func(cfg *config.AppConfig) *server.GinServer {
+	if err := c.Container.Provide(func(cfg *config.Config) *server.GinServer {
 		return server.NewGinServer(cfg, c.Container)
 	}); err != nil {
 		c.Error = err

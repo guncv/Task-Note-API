@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/aead/chacha20poly1305"
+	"github.com/guncv/tech-exam-software-engineering/config"
 	constants "github.com/guncv/tech-exam-software-engineering/constant"
 	"github.com/o1egl/paseto"
 )
@@ -20,14 +21,14 @@ type PasetoMaker struct {
 	symmetricKey []byte
 }
 
-func NewPasetoMaker(symmetricKey string) (IPasetoMaker, error) {
-	if len(symmetricKey) != chacha20poly1305.KeySize {
+func NewPasetoMaker(config *config.Config) (IPasetoMaker, error) {
+	if len(config.TokenConfig.TokenSymmetricKey) != chacha20poly1305.KeySize {
 		return nil, fmt.Errorf("invalid key size: mush be exactly %d characters", chacha20poly1305.KeySize)
 	}
 
 	maker := &PasetoMaker{
 		paseto:       paseto.NewV2(),
-		symmetricKey: []byte(symmetricKey),
+		symmetricKey: []byte(config.TokenConfig.TokenSymmetricKey),
 	}
 	return maker, nil
 }

@@ -7,7 +7,7 @@ import (
 )
 
 type Task struct {
-	ID          uuid.UUID `gorm:"type:uuid;column:id;default:gen_random_uuid();primaryKey" json:"id"`
+	ID          uuid.UUID `gorm:"type:uuid;column:id;primaryKey" json:"id"`
 	UserID      uuid.UUID `gorm:"type:uuid;column:user_id;not null" validate:"required" json:"user_id"`
 	Title       string    `gorm:"column:title;type:varchar(100);not null" validate:"required" json:"title"`                          // Title of the task
 	Description *string   `gorm:"column:description;type:text" json:"description,omitempty"`                                         // Optional description

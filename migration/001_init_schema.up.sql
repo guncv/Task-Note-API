@@ -9,7 +9,6 @@ CREATE TABLE tasks (
 
 CREATE INDEX idx_tasks_title ON tasks(title);
 CREATE INDEX idx_tasks_status ON tasks(status);
-CREATE INDEX idx_tasks_created_at ON tasks(created_at);
 
 COMMENT ON COLUMN tasks.title IS 'Title of the task (required, max 100 characters)';
 COMMENT ON COLUMN tasks.description IS 'Optional description';

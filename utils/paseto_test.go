@@ -4,12 +4,20 @@ import (
 	"testing"
 	"time"
 
+	"github.com/guncv/tech-exam-software-engineering/config"
 	constants "github.com/guncv/tech-exam-software-engineering/constant"
 	"github.com/stretchr/testify/require"
 )
 
 func TestPasetoMaker(t *testing.T) {
-	maker, err := NewPasetoMaker(RandomString(32))
+	config := &config.Config{
+		TokenConfig: config.TokenConfig{
+			TokenSymmetricKey:   RandomString(32),
+			AccessTokenDuration: time.Minute,
+		},
+	}
+
+	maker, err := NewPasetoMaker(config)
 	require.NoError(t, err)
 
 	userId := RandomString(32)
@@ -33,7 +41,14 @@ func TestPasetoMaker(t *testing.T) {
 }
 
 func TestExpiredPasetoToken(t *testing.T) {
-	maker, err := NewPasetoMaker(RandomString(32))
+	config := &config.Config{
+		TokenConfig: config.TokenConfig{
+			TokenSymmetricKey:   RandomString(32),
+			AccessTokenDuration: time.Minute,
+		},
+	}
+
+	maker, err := NewPasetoMaker(config)
 	require.NoError(t, err)
 
 	userId := RandomString(32)
