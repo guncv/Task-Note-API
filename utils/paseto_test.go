@@ -18,7 +18,7 @@ func TestPasetoMaker(t *testing.T) {
 		},
 	}
 
-	log := log.Initialize("local")
+	log := log.Initialize(constants.TestAppEnv)
 	maker, err := NewPasetoMaker(config, NewPayloadConstruct(config, log))
 
 	require.NoError(t, err)
@@ -51,7 +51,7 @@ func TestInvalidPasetoToken(t *testing.T) {
 		},
 	}
 
-	log := log.Initialize("local")
+	log := log.Initialize(constants.TestAppEnv)
 	maker, err := NewPasetoMaker(config, NewPayloadConstruct(config, log))
 	require.Error(t, err)
 	require.Nil(t, maker)
@@ -65,7 +65,7 @@ func TestExpiredPasetoToken(t *testing.T) {
 		},
 	}
 
-	log := log.Initialize("local")
+	log := log.Initialize(constants.TestAppEnv)
 	maker, err := NewPasetoMaker(config, NewPayloadConstruct(config, log))
 	require.NoError(t, err)
 

@@ -8,6 +8,7 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/guncv/tech-exam-software-engineering/config"
+	constants "github.com/guncv/tech-exam-software-engineering/constant"
 	"github.com/guncv/tech-exam-software-engineering/entities"
 	"github.com/guncv/tech-exam-software-engineering/infras/log"
 	"github.com/guncv/tech-exam-software-engineering/mocks"
@@ -20,7 +21,7 @@ import (
 
 func TestUserService_RegisterUser(t *testing.T) {
 	errMockError := errors.New("mock error")
-	lgr := log.Initialize("local")
+	lgr := log.Initialize(constants.TestAppEnv)
 
 	ctx := context.Background()
 
@@ -102,7 +103,7 @@ func TestUserService_RegisterUser(t *testing.T) {
 
 func TestUserService_LoginUser(t *testing.T) {
 	errMockError := errors.New("mock error")
-	lgr := log.Initialize("local")
+	lgr := log.Initialize(constants.TestAppEnv)
 	cfg := &config.Config{
 		TokenConfig: config.TokenConfig{
 			TokenSymmetricKey:   utils.RandomString(32),

@@ -13,7 +13,7 @@ import (
 )
 
 func TestPayload_GetAuthPayload(t *testing.T) {
-	log := log.Initialize("local")
+	log := log.Initialize(constants.TestAppEnv)
 
 	// Valid payload in context
 	expectedPayload := &Payload{

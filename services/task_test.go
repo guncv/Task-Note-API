@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+	constants "github.com/guncv/tech-exam-software-engineering/constant"
 	"github.com/guncv/tech-exam-software-engineering/entities"
 	"github.com/guncv/tech-exam-software-engineering/infras/log"
 	"github.com/guncv/tech-exam-software-engineering/mocks"
@@ -18,7 +19,7 @@ import (
 
 func TestTaskService_HealthCheck(t *testing.T) {
 	errMockError := errors.New("mock error")
-	lgr := log.Initialize("local")
+	lgr := log.Initialize(constants.TestAppEnv)
 
 	ctx := context.Background()
 	okResponse := "ok"
@@ -84,7 +85,7 @@ func TestTaskService_HealthCheck(t *testing.T) {
 }
 
 func TestTaskService_CreateTask(t *testing.T) {
-	lgr := log.Initialize("local")
+	lgr := log.Initialize(constants.TestAppEnv)
 	ctx := context.Background()
 	errMockError := errors.New("mock error")
 	empty := ""
@@ -211,7 +212,7 @@ func TestTaskService_CreateTask(t *testing.T) {
 }
 
 func TestTaskService_GetTask(t *testing.T) {
-	lgr := log.Initialize("local")
+	lgr := log.Initialize(constants.TestAppEnv)
 	ctx := context.Background()
 	errMockError := errors.New("mock error")
 
@@ -382,7 +383,7 @@ func TestTaskService_GetTask(t *testing.T) {
 }
 
 func TestTaskService_UpdateTask(t *testing.T) {
-	lgr := log.Initialize("local")
+	lgr := log.Initialize(constants.TestAppEnv)
 	ctx := context.Background()
 	errMockError := errors.New("mock error")
 
@@ -604,7 +605,7 @@ func TestTaskService_UpdateTask(t *testing.T) {
 }
 
 func TestTaskService_DeleteTask(t *testing.T) {
-	lgr := log.Initialize("local")
+	lgr := log.Initialize(constants.TestAppEnv)
 	ctx := context.Background()
 	errMockError := errors.New("mock error")
 	empty := ""
@@ -798,7 +799,7 @@ func TestTaskService_DeleteTask(t *testing.T) {
 }
 
 func TestTaskService_GetAllTasks(t *testing.T) {
-	lgr := log.Initialize("local")
+	lgr := log.Initialize(constants.TestAppEnv)
 	ctx := context.Background()
 	errMockError := errors.New("mock error")
 

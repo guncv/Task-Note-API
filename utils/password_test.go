@@ -4,6 +4,7 @@ import (
 	"context"
 	"testing"
 
+	constants "github.com/guncv/tech-exam-software-engineering/constant"
 	"github.com/guncv/tech-exam-software-engineering/infras/log"
 	"github.com/stretchr/testify/require"
 	"golang.org/x/crypto/bcrypt"
@@ -13,7 +14,7 @@ func TestPassword(t *testing.T) {
 	password := RandomString(8)
 	ctx := context.Background()
 
-	log := log.Initialize("local")
+	log := log.Initialize(constants.TestAppEnv)
 	hashedPassword1, err := HashPassword(ctx, password, log)
 	require.NoError(t, err)
 	require.NotEmpty(t, hashedPassword1)

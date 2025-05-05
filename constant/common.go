@@ -12,6 +12,7 @@ const (
 	AuthorizationTypeBearer            = "bearer"
 	AuthorizationPayloadKey            = "authorization_payload"
 	CurrentTimeLocation                = "Asia/Bangkok"
+	TestAppEnv                         = "test"
 )
 
 var (

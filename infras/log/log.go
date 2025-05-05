@@ -30,29 +30,35 @@ type Logger struct {
 // Initialize sets up the logger based on the application environment
 func Initialize(appEnv string) *Logger {
 	once.Do(func() {
+		var baseLogger *zap.Logger
 		var err error
-		var config zap.Config
 
-		if appEnv == "dev" || appEnv == "local" {
-			config = zap.NewDevelopmentConfig()
+		switch appEnv {
+		case "test":
+			// Use no-op logger that disables all logs
+			baseLogger = zap.NewNop()
+		case "dev", "local":
+			config := zap.NewDevelopmentConfig()
 			config.EncoderConfig.EncodeLevel = zapcore.CapitalColorLevelEncoder
-			config.EncoderConfig.EncodeTime = zapcore.RFC3339TimeEncoder // Use human-readable time
-			config.EncoderConfig.TimeKey = ""                            // Include time in logs
-			config.EncoderConfig.CallerKey = "caller"                    // Include caller information
-			config.EncoderConfig.MessageKey = "msg"                      // Message field key
-			config.EncoderConfig.LevelKey = "level"                      // Level field key
-			config.EncoderConfig.ConsoleSeparator = " | "                // Separator for better readability
-		} else {
-			config = zap.NewProductionConfig()
+			config.EncoderConfig.EncodeTime = zapcore.RFC3339TimeEncoder
+			config.EncoderConfig.TimeKey = ""
+			config.EncoderConfig.CallerKey = "caller"
+			config.EncoderConfig.MessageKey = "msg"
+			config.EncoderConfig.LevelKey = "level"
+			config.EncoderConfig.ConsoleSeparator = " | "
+			baseLogger, err = config.Build(zap.AddCaller())
+			if err != nil {
+				panic("failed to initialize zap logger: " + err.Error())
+			}
+		default:
+			config := zap.NewProductionConfig()
 			config.EncoderConfig.EncodeTime = zapcore.ISO8601TimeEncoder
+			baseLogger, err = config.Build(zap.AddCaller())
+			if err != nil {
+				panic("failed to initialize zap logger: " + err.Error())
+			}
 		}
 
-		baseLogger, err := config.Build(zap.AddCaller()) // Base logger includes caller
-		if err != nil {
-			panic("failed to initialize zap logger: " + err.Error())
-		}
-
-		// Convert zap.Logger to SugaredLogger for easier logging
 		loggerInstance = &Logger{baseLogger.Sugar()}
 	})
 
