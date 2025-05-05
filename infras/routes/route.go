@@ -6,6 +6,7 @@ import (
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"github.com/guncv/tech-exam-software-engineering/controllers"
+	"github.com/guncv/tech-exam-software-engineering/infras/log"
 	"github.com/guncv/tech-exam-software-engineering/middleware"
 	"github.com/guncv/tech-exam-software-engineering/utils"
 	swaggerFiles "github.com/swaggo/files"
@@ -13,7 +14,7 @@ import (
 	"go.uber.org/dig"
 )
 
-func RegisterRoutes(e *gin.Engine, c *dig.Container, tokenMaker utils.IPasetoMaker) {
+func RegisterRoutes(e *gin.Engine, c *dig.Container, tokenMaker utils.IPasetoMaker, log *log.Logger) {
 
 	e.Use(cors.New(cors.Config{
 		AllowOrigins:     []string{"http://localhost:3000"},
@@ -36,7 +37,7 @@ func RegisterRoutes(e *gin.Engine, c *dig.Container, tokenMaker utils.IPasetoMak
 		userRoutes(api, userController)
 
 		// Auth Middleware Routes
-		authRoutes := api.Group("/").Use(middleware.AuthMiddleware(tokenMaker))
+		authRoutes := api.Group("/").Use(middleware.AuthMiddleware(tokenMaker, log))
 
 		taskRoutes(authRoutes.(*gin.RouterGroup), taskController)
 	}); err != nil {
@@ -47,6 +48,10 @@ func RegisterRoutes(e *gin.Engine, c *dig.Container, tokenMaker utils.IPasetoMak
 func taskRoutes(eg *gin.RouterGroup, taskController *controllers.TaskController) {
 	tasks := eg.Group("/tasks")
 	tasks.POST("", taskController.CreateTask)
+	tasks.GET("", taskController.GetAllTasks)
+	tasks.GET("/:id", taskController.GetTask)
+	tasks.PUT("/:id", taskController.UpdateTask)
+	tasks.DELETE("/:id", taskController.DeleteTask)
 }
 
 func userRoutes(eg *gin.RouterGroup, userController *controllers.UserController) {

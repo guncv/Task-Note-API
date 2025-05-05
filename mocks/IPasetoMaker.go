@@ -23,9 +23,9 @@ func (_m *MockIPasetoMaker) EXPECT() *MockIPasetoMaker_Expecter {
 	return &MockIPasetoMaker_Expecter{mock: &_m.Mock}
 }
 
-// CreateToken provides a mock function with given fields: username, duration
-func (_m *MockIPasetoMaker) CreateToken(username string, duration time.Duration) (string, error) {
-	ret := _m.Called(username, duration)
+// CreateToken provides a mock function with given fields: userId, duration
+func (_m *MockIPasetoMaker) CreateToken(userId string, duration time.Duration) (string, error) {
+	ret := _m.Called(userId, duration)
 
 	if len(ret) == 0 {
 		panic("no return value specified for CreateToken")
@@ -34,16 +34,16 @@ func (_m *MockIPasetoMaker) CreateToken(username string, duration time.Duration)
 	var r0 string
 	var r1 error
 	if rf, ok := ret.Get(0).(func(string, time.Duration) (string, error)); ok {
-		return rf(username, duration)
+		return rf(userId, duration)
 	}
 	if rf, ok := ret.Get(0).(func(string, time.Duration) string); ok {
-		r0 = rf(username, duration)
+		r0 = rf(userId, duration)
 	} else {
 		r0 = ret.Get(0).(string)
 	}
 
 	if rf, ok := ret.Get(1).(func(string, time.Duration) error); ok {
-		r1 = rf(username, duration)
+		r1 = rf(userId, duration)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -57,13 +57,13 @@ type MockIPasetoMaker_CreateToken_Call struct {
 }
 
 // CreateToken is a helper method to define mock.On call
-//   - username string
+//   - userId string
 //   - duration time.Duration
-func (_e *MockIPasetoMaker_Expecter) CreateToken(username interface{}, duration interface{}) *MockIPasetoMaker_CreateToken_Call {
-	return &MockIPasetoMaker_CreateToken_Call{Call: _e.mock.On("CreateToken", username, duration)}
+func (_e *MockIPasetoMaker_Expecter) CreateToken(userId interface{}, duration interface{}) *MockIPasetoMaker_CreateToken_Call {
+	return &MockIPasetoMaker_CreateToken_Call{Call: _e.mock.On("CreateToken", userId, duration)}
 }
 
-func (_c *MockIPasetoMaker_CreateToken_Call) Run(run func(username string, duration time.Duration)) *MockIPasetoMaker_CreateToken_Call {
+func (_c *MockIPasetoMaker_CreateToken_Call) Run(run func(userId string, duration time.Duration)) *MockIPasetoMaker_CreateToken_Call {
 	_c.Call.Run(func(args mock.Arguments) {
 		run(args[0].(string), args[1].(time.Duration))
 	})

@@ -41,7 +41,7 @@ func NewUserService(
 
 func (s *UserService) RegisterUser(ctx context.Context, req *entities.RegisterRequest) (*entities.RegisterResponse, error) {
 	s.log.DebugWithID(ctx, "[Service: RegisterUser] Called")
-	hashedPassword, err := utils.HashPassword(req.Password)
+	hashedPassword, err := utils.HashPassword(ctx, req.Password, s.log)
 	if err != nil {
 		s.log.ErrorWithID(ctx, "[Service: RegisterUser] Failed to hash password: ", err)
 		return nil, err
@@ -84,12 +84,12 @@ func (s *UserService) LoginUser(ctx context.Context, req *entities.LoginRequest)
 
 	user, err := s.repo.GetUser(ctx, req.Email)
 	if err != nil {
-
 		s.log.ErrorWithID(ctx, "[Service: LoginUser] Failed to get user: ", err)
 		return nil, err
 	}
+	s.log.DebugWithID(ctx, "[Service: LoginUser] User found: ", user.ID.String())
 
-	if err = utils.CheckPassword(req.Password, user.Password); err != nil {
+	if err = utils.CheckPassword(ctx, req.Password, user.Password, s.log); err != nil {
 		s.log.ErrorWithID(ctx, "[Service: LoginUser] Failed to check password: ", err)
 		return nil, err
 	}

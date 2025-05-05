@@ -10,6 +10,7 @@ import (
 	"github.com/go-playground/validator/v10"
 	"github.com/guncv/tech-exam-software-engineering/config"
 	constants "github.com/guncv/tech-exam-software-engineering/constant"
+	"github.com/guncv/tech-exam-software-engineering/infras/log"
 	"github.com/guncv/tech-exam-software-engineering/infras/routes"
 	"github.com/guncv/tech-exam-software-engineering/utils"
 	"go.uber.org/dig"
@@ -42,7 +43,7 @@ func NewGinServer(c *config.Config, diContainer *dig.Container) *GinServer {
 		TokenMaker: tokenMaker,
 	}
 
-	routes.RegisterRoutes(router, diContainer, s.TokenMaker)
+	routes.RegisterRoutes(router, diContainer, s.TokenMaker, log.Initialize(c.AppConfig.AppEnv))
 	return s
 }
 

@@ -1,36 +1,42 @@
 package services
 
 import (
-	"bytes"
 	"context"
-	"encoding/base64"
-	"errors"
-	"io"
+	"time"
 
 	"github.com/google/uuid"
+	constants "github.com/guncv/tech-exam-software-engineering/constant"
 	"github.com/guncv/tech-exam-software-engineering/entities"
 	"github.com/guncv/tech-exam-software-engineering/infras/log"
-	"github.com/guncv/tech-exam-software-engineering/mapping"
+	"github.com/guncv/tech-exam-software-engineering/models"
 	"github.com/guncv/tech-exam-software-engineering/repositories"
+	"github.com/guncv/tech-exam-software-engineering/utils"
 )
 
 type ITaskService interface {
 	HealthCheck(ctx context.Context) (*entities.GetHealthUserResponse, error)
 	CreateTask(ctx context.Context, req *entities.CreateTaskRequest) (*entities.CreateTaskResponse, error)
+	GetTask(ctx context.Context, req string) (*entities.GetTaskResponse, error)
+	UpdateTask(ctx context.Context, id string, req *entities.UpdateTaskRequest) (*entities.UpdateTaskResponse, error)
+	DeleteTask(ctx context.Context, id string) error
+	GetAllTasks(ctx context.Context, req *entities.GetAllTasksRequest) (*entities.GetAllTasksResponse, error)
 }
 
 type TaskService struct {
-	repo repositories.ITaskRepository
-	log  *log.Logger
+	repo    repositories.ITaskRepository
+	log     *log.Logger
+	payload utils.IPayload
 }
 
 func NewTaskService(
 	repo repositories.ITaskRepository,
 	log *log.Logger,
+	payload utils.IPayload,
 ) ITaskService {
 	return &TaskService{
-		repo: repo,
-		log:  log,
+		repo:    repo,
+		log:     log,
+		payload: payload,
 	}
 }
 
@@ -48,36 +54,250 @@ func (s *TaskService) HealthCheck(ctx context.Context) (*entities.GetHealthUserR
 func (s *TaskService) CreateTask(ctx context.Context, req *entities.CreateTaskRequest) (*entities.CreateTaskResponse, error) {
 	s.log.DebugWithID(ctx, "[Service: CreateTask] Called:")
 
+	// Get auth payload
+	authPayload, err := s.payload.GetAuthPayload(ctx, s.log)
+	if err != nil {
+		s.log.ErrorWithID(ctx, "[Service: CreateTask] Failed to get auth payload", err)
+		return nil, err
+	}
+	s.log.DebugWithID(ctx, "[Service: CreateTask] Auth payload: ", authPayload)
+
 	// Encode image to base64
 	base64Image := ""
 	if req.Image != nil {
-		file, err := req.Image.Open()
+		var err error
+		base64Image, err = utils.ConvertFileHeaderToBase64(req.Image)
 		if err != nil {
-			s.log.ErrorWithID(ctx, "[Service: CreateTask] Failed to open image", err)
-			return nil, errors.New("unable to read image")
+			s.log.ErrorWithID(ctx, "[Service: CreateTask] Failed to encode image to base64", err)
+			return nil, err
 		}
-		defer file.Close()
-
-		buf := new(bytes.Buffer)
-		if _, err := io.Copy(buf, file); err != nil {
-			s.log.ErrorWithID(ctx, "[Service: CreateTask] Failed to read image", err)
-			return nil, errors.New("unable to read image")
-		}
-
-		base64Image = base64.StdEncoding.EncodeToString(buf.Bytes())
-		s.log.DebugWithID(ctx, "[Service: CreateTask] Encoded image to Base64")
 	}
 
-	task := mapping.MapCreateTaskRequestToTask(req, base64Image, uuid.New())
-
-	repoResponse, err := s.repo.CreateTask(ctx, task)
+	// Get current time
+	currentTime, err := utils.GetCurrentTimeWithRFC3339()
 	if err != nil {
-		s.log.ErrorWithID(ctx, "[Service: CreateTask] Failed to create task", err)
-		return nil, errors.New("failed to create task")
+		s.log.ErrorWithID(ctx, "[Service: CreateTask] Failed to get current time", err)
+		return nil, err
 	}
 
-	resp := mapping.MapCreateTaskResponseToTask(repoResponse, "Task created successfully")
+	// Create task
+	arg := &models.Task{
+		ID:          uuid.New(),
+		UserID:      authPayload.UserId,
+		Title:       req.Title,
+		Status:      string(req.Status),
+		Image:       &base64Image,
+		Description: req.Description,
+		CreatedAt:   currentTime,
+	}
+
+	// Create task in repository
+	if err := s.repo.CreateTask(ctx, arg); err != nil {
+		s.log.ErrorWithID(ctx, "[Service: CreateTask] Failed to create task", err)
+		return nil, err
+	}
+
+	// Convert to response
+	resp := &entities.CreateTaskResponse{
+		ID:          arg.ID.String(),
+		UserID:      arg.UserID,
+		Title:       arg.Title,
+		Status:      arg.Status,
+		Image:       arg.Image,
+		Description: arg.Description,
+		CreatedAt:   arg.CreatedAt.Format(time.RFC3339),
+	}
 
 	s.log.DebugWithID(ctx, "[Service: CreateTask] Task created successfully", resp)
 	return resp, nil
+}
+
+func (s *TaskService) GetTask(ctx context.Context, req string) (*entities.GetTaskResponse, error) {
+	s.log.DebugWithID(ctx, "[Service: GetTask] Called:")
+
+	// Get auth payload
+	authPayload, err := s.payload.GetAuthPayload(ctx, s.log)
+	if err != nil {
+		s.log.ErrorWithID(ctx, "[Service: GetTask] Failed to get auth payload", err)
+		return nil, err
+	}
+	s.log.DebugWithID(ctx, "[Service: GetTask] Auth payload: ", authPayload)
+
+	// Get task from repository
+	repoResponse, err := s.repo.GetTask(ctx, req)
+	if err != nil {
+		s.log.ErrorWithID(ctx, "[Service: GetTask] Failed to get task", err)
+		return nil, err
+	}
+
+	// Verify payload user id with your account id
+	if authPayload.UserId != repoResponse.UserID {
+		s.log.ErrorWithID(ctx, "[Service: GetTask] Failed to verify task id", constants.ErrUserIdDoesNotMatchWithYourAccount)
+		return nil, constants.ErrUserIdDoesNotMatchWithYourAccount
+	}
+
+	// Convert to response
+	resp := &entities.GetTaskResponse{
+		ID:          repoResponse.ID.String(),
+		UserID:      repoResponse.UserID,
+		Title:       repoResponse.Title,
+		Status:      repoResponse.Status,
+		Image:       repoResponse.Image,
+		Description: repoResponse.Description,
+		CreatedAt:   repoResponse.CreatedAt.Format(time.RFC3339),
+	}
+
+	s.log.DebugWithID(ctx, "[Service: GetTask] Task retrieved successfully", resp)
+	return resp, nil
+}
+
+func (s *TaskService) UpdateTask(ctx context.Context, id string, req *entities.UpdateTaskRequest) (*entities.UpdateTaskResponse, error) {
+	s.log.DebugWithID(ctx, "[Service: UpdateTask] Called")
+
+	// Get auth payload
+	authPayload, err := s.payload.GetAuthPayload(ctx, s.log)
+	if err != nil {
+		s.log.ErrorWithID(ctx, "[Service: UpdateTask] Failed to get auth payload", err)
+		return nil, err
+	}
+
+	// Get existing task
+	existingTask, err := s.repo.GetTask(ctx, id)
+	if err != nil {
+		s.log.ErrorWithID(ctx, "[Service: UpdateTask] Failed to get task", err)
+		return nil, err
+	}
+
+	// Check ownership
+	if authPayload.UserId != existingTask.UserID {
+		s.log.ErrorWithID(ctx, "[Service: UpdateTask] User ID does not match task owner", constants.ErrUserIdDoesNotMatchWithYourAccount)
+		return nil, constants.ErrUserIdDoesNotMatchWithYourAccount
+	}
+
+	// Update fields if present
+	if req.Title != "" {
+		existingTask.Title = req.Title
+	}
+	if req.Description != nil {
+		existingTask.Description = req.Description
+	}
+	if req.Status != "" {
+		existingTask.Status = string(req.Status)
+	}
+	if req.Image != nil {
+		base64Image, err := utils.ConvertFileHeaderToBase64(req.Image)
+		if err != nil {
+			s.log.ErrorWithID(ctx, "[Service: UpdateTask] Failed to convert image to base64", err)
+			return nil, err
+		}
+		existingTask.Image = &base64Image
+	}
+
+	// Save update
+	if err := s.repo.UpdateTask(ctx, existingTask); err != nil {
+		s.log.ErrorWithID(ctx, "[Service: UpdateTask] Failed to update task", err)
+		return nil, err
+	}
+
+	// Response
+	resp := &entities.UpdateTaskResponse{
+		ID:          existingTask.ID.String(),
+		UserID:      existingTask.UserID,
+		Title:       existingTask.Title,
+		Status:      existingTask.Status,
+		Image:       existingTask.Image,
+		Description: existingTask.Description,
+		CreatedAt:   existingTask.CreatedAt.Format(time.RFC3339),
+	}
+
+	s.log.DebugWithID(ctx, "[Service: UpdateTask] Task updated successfully", resp)
+	return resp, nil
+}
+
+func (s *TaskService) DeleteTask(ctx context.Context, id string) error {
+	s.log.DebugWithID(ctx, "[Service: DeleteTask] Called")
+
+	// Get auth payload
+	authPayload, err := s.payload.GetAuthPayload(ctx, s.log)
+	if err != nil {
+		s.log.ErrorWithID(ctx, "[Service: DeleteTask] Failed to get auth payload", err)
+		return err
+	}
+
+	// Get existing task
+	existingTask, err := s.repo.GetTask(ctx, id)
+	if err != nil {
+		s.log.ErrorWithID(ctx, "[Service: DeleteTask] Failed to get task", err)
+		return err
+	}
+
+	// Check ownership
+	if authPayload.UserId != existingTask.UserID {
+		s.log.ErrorWithID(ctx, "[Service: DeleteTask] User ID does not match task owner", constants.ErrUserIdDoesNotMatchWithYourAccount)
+		return constants.ErrUserIdDoesNotMatchWithYourAccount
+	}
+
+	// Delete task
+	if err := s.repo.DeleteTask(ctx, id); err != nil {
+		s.log.ErrorWithID(ctx, "[Service: DeleteTask] Failed to delete task", err)
+		return err
+	}
+
+	s.log.DebugWithID(ctx, "[Service: DeleteTask] Task deleted successfully")
+	return nil
+}
+
+func (s *TaskService) GetAllTasks(ctx context.Context, req *entities.GetAllTasksRequest) (*entities.GetAllTasksResponse, error) {
+	s.log.DebugWithID(ctx, "[Service: GetAllTasks] Called")
+
+	// Get auth payload
+	authPayload, err := s.payload.GetAuthPayload(ctx, s.log)
+	if err != nil {
+		s.log.ErrorWithID(ctx, "[Service: GetAllTasks] Failed to get auth payload", err)
+		return nil, err
+	}
+	s.log.DebugWithID(ctx, "[Service: GetAllTasks] Auth payload: ", authPayload)
+
+	// Apply default values
+	if req.Limit == 0 {
+		req.Limit = 20
+	}
+	if req.Order == "" {
+		req.Order = "desc"
+	}
+	if req.SortBy == "" {
+		req.SortBy = "created_at"
+	}
+
+	// Set Offset
+	req.Offset = (req.Offset - 1) * req.Limit
+
+	// Fetch tasks from repository
+	repoTasks, err := s.repo.GetAllTasks(ctx, req, authPayload.UserId)
+	if err != nil {
+		s.log.ErrorWithID(ctx, "[Service: GetAllTasks] Failed to get all tasks", err)
+		return nil, err
+	}
+
+	// Convert []models.Task → []entities.Task
+	var tasks []entities.GetTaskResponse
+	for _, t := range *repoTasks {
+		tasks = append(tasks, entities.GetTaskResponse{
+			ID:          t.ID.String(),
+			UserID:      t.UserID,
+			Title:       t.Title,
+			Description: t.Description,
+			Image:       t.Image,
+			Status:      t.Status,
+			CreatedAt:   t.CreatedAt.Format(time.RFC3339),
+		})
+	}
+
+	response := &entities.GetAllTasksResponse{
+		Total: len(tasks),
+		Tasks: tasks,
+	}
+
+	s.log.DebugWithID(ctx, "[Service: GetAllTasks] Tasks retrieved successfully", response)
+	return response, nil
 }

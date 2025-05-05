@@ -23,6 +23,15 @@ func NewUserController(service services.IUserService, log *log.Logger) *UserCont
 	}
 }
 
+// @Summary Register a new user
+// @Description Register a new user with email and password
+// @Accept json
+// @Produce json
+// @Param registerRequest body entities.RegisterRequest true "Register request"
+// @Success 200 {object} entities.RegisterResponse
+// @Failure 400 {object} gin.H{"error": "Invalid request"}
+// @Failure 500 {object} gin.H{"error": "Failed to register user"}
+// @Router /v1/users/register [post]
 func (c *UserController) Register(ctx *gin.Context) {
 	c.log.DebugWithID(ctx, "[Controller: Register] Called")
 	var req entities.RegisterRequest
@@ -39,10 +48,20 @@ func (c *UserController) Register(ctx *gin.Context) {
 		return
 	}
 
-	c.log.DebugWithID(ctx, "[Controller: Register] Successfully registered user")
+	c.log.InfoWithID(ctx, "[Controller: Register] Successfully registered user")
 	ctx.JSON(http.StatusOK, resp)
 }
 
+// @Summary Login a user
+// @Description Login a user with email and password
+// @Accept json
+// @Produce json
+// @Param loginRequest body entities.LoginRequest true "Login request"
+// @Success 200 {object} entities.LoginResponse
+// @Failure 400 {object} gin.H{"error": "Invalid request"}
+// @Failure 401 {object} gin.H{"error": "Invalid credentials"}
+// @Failure 500 {object} gin.H{"error": "Failed to login user"}
+// @Router /v1/users/login [post]
 func (c *UserController) Login(ctx *gin.Context) {
 	c.log.DebugWithID(ctx, "[Controller: Login] Called")
 	var req entities.LoginRequest
@@ -64,6 +83,6 @@ func (c *UserController) Login(ctx *gin.Context) {
 		return
 	}
 
-	c.log.DebugWithID(ctx, "[Controller: Login] Successfully logged in user")
+	c.log.InfoWithID(ctx, "[Controller: Login] Successfully logged in user")
 	ctx.JSON(http.StatusOK, resp)
 }

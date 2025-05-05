@@ -11,7 +11,7 @@ import (
 )
 
 type IPasetoMaker interface {
-	CreateToken(username string, duration time.Duration) (string, error)
+	CreateToken(userId string, duration time.Duration) (string, error)
 	VerifyToken(token string) (*Payload, error)
 }
 
@@ -34,8 +34,8 @@ func NewPasetoMaker(config *config.Config) (IPasetoMaker, error) {
 }
 
 // CreateToken creates a new token for a specific username and duration
-func (maker *PasetoMaker) CreateToken(username string, duration time.Duration) (string, error) {
-	payload, err := NewPayload(username, duration)
+func (maker *PasetoMaker) CreateToken(userId string, duration time.Duration) (string, error) {
+	payload, err := NewPayload(userId, duration)
 	if err != nil {
 		return "", err
 	}
