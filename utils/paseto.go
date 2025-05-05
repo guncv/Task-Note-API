@@ -17,25 +17,27 @@ type IPasetoMaker interface {
 
 // PasetoMaker is a PASETO token maker
 type PasetoMaker struct {
-	paseto       *paseto.V2
-	symmetricKey []byte
+	paseto           *paseto.V2
+	symmetricKey     []byte
+	payloadConstruct IPayloadConstruct
 }
 
-func NewPasetoMaker(config *config.Config) (IPasetoMaker, error) {
+func NewPasetoMaker(config *config.Config, payloadConstruct IPayloadConstruct) (IPasetoMaker, error) {
 	if len(config.TokenConfig.TokenSymmetricKey) != chacha20poly1305.KeySize {
 		return nil, fmt.Errorf("invalid key size: mush be exactly %d characters", chacha20poly1305.KeySize)
 	}
 
 	maker := &PasetoMaker{
-		paseto:       paseto.NewV2(),
-		symmetricKey: []byte(config.TokenConfig.TokenSymmetricKey),
+		paseto:           paseto.NewV2(),
+		symmetricKey:     []byte(config.TokenConfig.TokenSymmetricKey),
+		payloadConstruct: payloadConstruct,
 	}
 	return maker, nil
 }
 
 // CreateToken creates a new token for a specific username and duration
 func (maker *PasetoMaker) CreateToken(userId string, duration time.Duration) (string, error) {
-	payload, err := NewPayload(userId, duration)
+	payload, err := maker.payloadConstruct.NewCreatePayload(userId, duration)
 	if err != nil {
 		return "", err
 	}
@@ -51,7 +53,7 @@ func (maker *PasetoMaker) VerifyToken(token string) (*Payload, error) {
 		return nil, constants.ErrInvalidToken
 	}
 
-	if err := payload.Valid(); err != nil {
+	if err := maker.payloadConstruct.Valid(payload); err != nil {
 		return nil, err
 	}
 

@@ -6,6 +6,7 @@ import (
 
 	"github.com/guncv/tech-exam-software-engineering/config"
 	constants "github.com/guncv/tech-exam-software-engineering/constant"
+	"github.com/guncv/tech-exam-software-engineering/infras/log"
 	"github.com/stretchr/testify/require"
 )
 
@@ -17,7 +18,9 @@ func TestPasetoMaker(t *testing.T) {
 		},
 	}
 
-	maker, err := NewPasetoMaker(config)
+	log := log.Initialize("local")
+	maker, err := NewPasetoMaker(config, NewPayloadConstruct(config, log))
+
 	require.NoError(t, err)
 
 	userId := RandomString(32)
@@ -40,6 +43,20 @@ func TestPasetoMaker(t *testing.T) {
 	require.WithinDuration(t, expiredAt, payload.ExpiredAt, time.Second)
 }
 
+func TestInvalidPasetoToken(t *testing.T) {
+	config := &config.Config{
+		TokenConfig: config.TokenConfig{
+			TokenSymmetricKey:   RandomString(31),
+			AccessTokenDuration: time.Minute,
+		},
+	}
+
+	log := log.Initialize("local")
+	maker, err := NewPasetoMaker(config, NewPayloadConstruct(config, log))
+	require.Error(t, err)
+	require.Nil(t, maker)
+}
+
 func TestExpiredPasetoToken(t *testing.T) {
 	config := &config.Config{
 		TokenConfig: config.TokenConfig{
@@ -48,7 +65,8 @@ func TestExpiredPasetoToken(t *testing.T) {
 		},
 	}
 
-	maker, err := NewPasetoMaker(config)
+	log := log.Initialize("local")
+	maker, err := NewPasetoMaker(config, NewPayloadConstruct(config, log))
 	require.NoError(t, err)
 
 	userId := RandomString(32)

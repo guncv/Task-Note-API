@@ -32,7 +32,8 @@ func NewGinServer(c *config.Config, diContainer *dig.Container) *GinServer {
 
 	RegisterCustomValidations()
 
-	tokenMaker, err := utils.NewPasetoMaker(c)
+	log := log.Initialize(c.AppConfig.AppEnv)
+	tokenMaker, err := utils.NewPasetoMaker(c, utils.NewPayloadConstruct(c, log))
 	if err != nil {
 		panic(err)
 	}
@@ -43,7 +44,7 @@ func NewGinServer(c *config.Config, diContainer *dig.Container) *GinServer {
 		TokenMaker: tokenMaker,
 	}
 
-	routes.RegisterRoutes(router, diContainer, s.TokenMaker, log.Initialize(c.AppConfig.AppEnv))
+	routes.RegisterRoutes(router, diContainer, s.TokenMaker, log)
 	return s
 }
 

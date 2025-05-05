@@ -25,13 +25,13 @@ type ITaskService interface {
 type TaskService struct {
 	repo    repositories.ITaskRepository
 	log     *log.Logger
-	payload utils.IPayload
+	payload utils.IPayloadConstruct
 }
 
 func NewTaskService(
 	repo repositories.ITaskRepository,
 	log *log.Logger,
-	payload utils.IPayload,
+	payload utils.IPayloadConstruct,
 ) ITaskService {
 	return &TaskService{
 		repo:    repo,

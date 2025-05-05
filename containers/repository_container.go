@@ -14,7 +14,7 @@ func (c *Container) RepositoryProvider() {
 		c.Error = err
 	}
 
-	if err := c.Container.Provide(utils.NewPayload); err != nil {
+	if err := c.Container.Provide(utils.NewPayloadConstruct); err != nil {
 		c.Error = err
 	}
 }

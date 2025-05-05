@@ -114,15 +114,15 @@ func TestTaskService_CreateTask(t *testing.T) {
 
 	testCases := []struct {
 		name   string
-		setup  func() (*mocks.MockITaskRepository, *mocks.MockIPayload)
+		setup  func() (*mocks.MockITaskRepository, *mocks.MockIPayloadConstruct)
 		input  func() (context.Context, *entities.CreateTaskRequest)
 		verify func(t *testing.T, got *entities.CreateTaskResponse, gotErr error)
 	}{
 		{
 			name: "CreateTask_OK",
-			setup: func() (*mocks.MockITaskRepository, *mocks.MockIPayload) {
+			setup: func() (*mocks.MockITaskRepository, *mocks.MockIPayloadConstruct) {
 				mockTaskRepo := new(mocks.MockITaskRepository)
-				mockPayload := new(mocks.MockIPayload)
+				mockPayload := new(mocks.MockIPayloadConstruct)
 
 				mockPayload.EXPECT().
 					GetAuthPayload(ctx, mock.Anything).
@@ -151,9 +151,9 @@ func TestTaskService_CreateTask(t *testing.T) {
 		},
 		{
 			name: "CreateTask_AuthorizationError",
-			setup: func() (*mocks.MockITaskRepository, *mocks.MockIPayload) {
+			setup: func() (*mocks.MockITaskRepository, *mocks.MockIPayloadConstruct) {
 				mockTaskRepo := new(mocks.MockITaskRepository)
-				mockPayload := new(mocks.MockIPayload)
+				mockPayload := new(mocks.MockIPayloadConstruct)
 
 				mockPayload.EXPECT().
 					GetAuthPayload(ctx, mock.Anything).
@@ -171,9 +171,9 @@ func TestTaskService_CreateTask(t *testing.T) {
 		},
 		{
 			name: "CreateTask_ReturnError",
-			setup: func() (*mocks.MockITaskRepository, *mocks.MockIPayload) {
+			setup: func() (*mocks.MockITaskRepository, *mocks.MockIPayloadConstruct) {
 				mockTaskRepo := new(mocks.MockITaskRepository)
-				mockPayload := new(mocks.MockIPayload)
+				mockPayload := new(mocks.MockIPayloadConstruct)
 
 				mockPayload.EXPECT().
 					GetAuthPayload(ctx, mock.Anything).
@@ -237,15 +237,15 @@ func TestTaskService_GetTask(t *testing.T) {
 
 	testCases := []struct {
 		name   string
-		setup  func() (*mocks.MockITaskRepository, *mocks.MockIPayload)
+		setup  func() (*mocks.MockITaskRepository, *mocks.MockIPayloadConstruct)
 		input  func() (context.Context, string)
 		verify func(t *testing.T, got *entities.GetTaskResponse, gotErr error)
 	}{
 		{
 			name: "GetTask_OK",
-			setup: func() (*mocks.MockITaskRepository, *mocks.MockIPayload) {
+			setup: func() (*mocks.MockITaskRepository, *mocks.MockIPayloadConstruct) {
 				mockTaskRepo := new(mocks.MockITaskRepository)
-				mockPayload := new(mocks.MockIPayload)
+				mockPayload := new(mocks.MockIPayloadConstruct)
 
 				getTaskResponse := &models.Task{
 					ID:          uuid.MustParse(requestId),
@@ -284,9 +284,9 @@ func TestTaskService_GetTask(t *testing.T) {
 		},
 		{
 			name: "GetTask_AuthorizationError",
-			setup: func() (*mocks.MockITaskRepository, *mocks.MockIPayload) {
+			setup: func() (*mocks.MockITaskRepository, *mocks.MockIPayloadConstruct) {
 				mockTaskRepo := new(mocks.MockITaskRepository)
-				mockPayload := new(mocks.MockIPayload)
+				mockPayload := new(mocks.MockIPayloadConstruct)
 
 				mockPayload.EXPECT().
 					GetAuthPayload(ctx, mock.Anything).
@@ -304,9 +304,9 @@ func TestTaskService_GetTask(t *testing.T) {
 		},
 		{
 			name: "GetTask_ReturnError",
-			setup: func() (*mocks.MockITaskRepository, *mocks.MockIPayload) {
+			setup: func() (*mocks.MockITaskRepository, *mocks.MockIPayloadConstruct) {
 				mockTaskRepo := new(mocks.MockITaskRepository)
-				mockPayload := new(mocks.MockIPayload)
+				mockPayload := new(mocks.MockIPayloadConstruct)
 
 				mockPayload.EXPECT().
 					GetAuthPayload(ctx, mock.Anything).
@@ -330,9 +330,9 @@ func TestTaskService_GetTask(t *testing.T) {
 		},
 		{
 			name: "GetTask_NotMatchUserID",
-			setup: func() (*mocks.MockITaskRepository, *mocks.MockIPayload) {
+			setup: func() (*mocks.MockITaskRepository, *mocks.MockIPayloadConstruct) {
 				mockTaskRepo := new(mocks.MockITaskRepository)
-				mockPayload := new(mocks.MockIPayload)
+				mockPayload := new(mocks.MockIPayloadConstruct)
 
 				getTaskResponse := &models.Task{
 					ID:          uuid.MustParse(requestId),
@@ -415,15 +415,15 @@ func TestTaskService_UpdateTask(t *testing.T) {
 
 	testCases := []struct {
 		name   string
-		setup  func() (*mocks.MockITaskRepository, *mocks.MockIPayload)
+		setup  func() (*mocks.MockITaskRepository, *mocks.MockIPayloadConstruct)
 		input  func() (context.Context, string, *entities.UpdateTaskRequest)
 		verify func(t *testing.T, got *entities.UpdateTaskResponse, gotErr error)
 	}{
 		{
 			name: "UpdateTask_OK",
-			setup: func() (*mocks.MockITaskRepository, *mocks.MockIPayload) {
+			setup: func() (*mocks.MockITaskRepository, *mocks.MockIPayloadConstruct) {
 				mockTaskRepo := new(mocks.MockITaskRepository)
-				mockPayload := new(mocks.MockIPayload)
+				mockPayload := new(mocks.MockIPayloadConstruct)
 
 				taskResponse := &models.Task{
 					ID:          uuid.MustParse(requestId),
@@ -466,9 +466,9 @@ func TestTaskService_UpdateTask(t *testing.T) {
 		},
 		{
 			name: "UpdateTask_AuthorizationError",
-			setup: func() (*mocks.MockITaskRepository, *mocks.MockIPayload) {
+			setup: func() (*mocks.MockITaskRepository, *mocks.MockIPayloadConstruct) {
 				mockTaskRepo := new(mocks.MockITaskRepository)
-				mockPayload := new(mocks.MockIPayload)
+				mockPayload := new(mocks.MockIPayloadConstruct)
 
 				mockPayload.EXPECT().
 					GetAuthPayload(ctx, mock.Anything).
@@ -486,9 +486,9 @@ func TestTaskService_UpdateTask(t *testing.T) {
 		},
 		{
 			name: "UpdateTask_GetTaskError",
-			setup: func() (*mocks.MockITaskRepository, *mocks.MockIPayload) {
+			setup: func() (*mocks.MockITaskRepository, *mocks.MockIPayloadConstruct) {
 				mockTaskRepo := new(mocks.MockITaskRepository)
-				mockPayload := new(mocks.MockIPayload)
+				mockPayload := new(mocks.MockIPayloadConstruct)
 
 				mockPayload.EXPECT().
 					GetAuthPayload(ctx, mock.Anything).
@@ -512,9 +512,9 @@ func TestTaskService_UpdateTask(t *testing.T) {
 		},
 		{
 			name: "UpdateTask_NotMatchUserID",
-			setup: func() (*mocks.MockITaskRepository, *mocks.MockIPayload) {
+			setup: func() (*mocks.MockITaskRepository, *mocks.MockIPayloadConstruct) {
 				mockTaskRepo := new(mocks.MockITaskRepository)
-				mockPayload := new(mocks.MockIPayload)
+				mockPayload := new(mocks.MockIPayloadConstruct)
 
 				getTaskResponse := &models.Task{
 					ID:          uuid.MustParse(requestId),
@@ -548,9 +548,9 @@ func TestTaskService_UpdateTask(t *testing.T) {
 		},
 		{
 			name: "UpdateTask_UpdateTaskError",
-			setup: func() (*mocks.MockITaskRepository, *mocks.MockIPayload) {
+			setup: func() (*mocks.MockITaskRepository, *mocks.MockIPayloadConstruct) {
 				mockTaskRepo := new(mocks.MockITaskRepository)
-				mockPayload := new(mocks.MockIPayload)
+				mockPayload := new(mocks.MockIPayloadConstruct)
 
 				taskResponse := &models.Task{
 					ID:          uuid.MustParse(requestId),
@@ -619,15 +619,15 @@ func TestTaskService_DeleteTask(t *testing.T) {
 
 	testCases := []struct {
 		name   string
-		setup  func() (*mocks.MockITaskRepository, *mocks.MockIPayload)
+		setup  func() (*mocks.MockITaskRepository, *mocks.MockIPayloadConstruct)
 		input  func() (context.Context, string)
 		verify func(t *testing.T, gotErr error)
 	}{
 		{
 			name: "DeleteTask_OK",
-			setup: func() (*mocks.MockITaskRepository, *mocks.MockIPayload) {
+			setup: func() (*mocks.MockITaskRepository, *mocks.MockIPayloadConstruct) {
 				mockTaskRepo := new(mocks.MockITaskRepository)
-				mockPayload := new(mocks.MockIPayload)
+				mockPayload := new(mocks.MockIPayloadConstruct)
 
 				taskResponse := &models.Task{
 					ID:          uuid.MustParse(requestId),
@@ -664,9 +664,9 @@ func TestTaskService_DeleteTask(t *testing.T) {
 		},
 		{
 			name: "DeleteTask_AuthorizationError",
-			setup: func() (*mocks.MockITaskRepository, *mocks.MockIPayload) {
+			setup: func() (*mocks.MockITaskRepository, *mocks.MockIPayloadConstruct) {
 				mockTaskRepo := new(mocks.MockITaskRepository)
-				mockPayload := new(mocks.MockIPayload)
+				mockPayload := new(mocks.MockIPayloadConstruct)
 
 				mockPayload.EXPECT().
 					GetAuthPayload(ctx, mock.Anything).
@@ -683,9 +683,9 @@ func TestTaskService_DeleteTask(t *testing.T) {
 		},
 		{
 			name: "DeleteTask_GetTaskError",
-			setup: func() (*mocks.MockITaskRepository, *mocks.MockIPayload) {
+			setup: func() (*mocks.MockITaskRepository, *mocks.MockIPayloadConstruct) {
 				mockTaskRepo := new(mocks.MockITaskRepository)
-				mockPayload := new(mocks.MockIPayload)
+				mockPayload := new(mocks.MockIPayloadConstruct)
 
 				mockPayload.EXPECT().
 					GetAuthPayload(ctx, mock.Anything).
@@ -708,9 +708,9 @@ func TestTaskService_DeleteTask(t *testing.T) {
 		},
 		{
 			name: "DeleteTask_NotMatchUserID",
-			setup: func() (*mocks.MockITaskRepository, *mocks.MockIPayload) {
+			setup: func() (*mocks.MockITaskRepository, *mocks.MockIPayloadConstruct) {
 				mockTaskRepo := new(mocks.MockITaskRepository)
-				mockPayload := new(mocks.MockIPayload)
+				mockPayload := new(mocks.MockIPayloadConstruct)
 
 				taskResponse := &models.Task{
 					ID:          uuid.MustParse(requestId),
@@ -743,9 +743,9 @@ func TestTaskService_DeleteTask(t *testing.T) {
 		},
 		{
 			name: "DeleteTask_DeleteTaskError",
-			setup: func() (*mocks.MockITaskRepository, *mocks.MockIPayload) {
+			setup: func() (*mocks.MockITaskRepository, *mocks.MockIPayloadConstruct) {
 				mockTaskRepo := new(mocks.MockITaskRepository)
-				mockPayload := new(mocks.MockIPayload)
+				mockPayload := new(mocks.MockIPayloadConstruct)
 
 				taskResponse := &models.Task{
 					ID:          uuid.MustParse(requestId),
@@ -811,15 +811,15 @@ func TestTaskService_GetAllTasks(t *testing.T) {
 
 	testCases := []struct {
 		name   string
-		setup  func() (*mocks.MockITaskRepository, *mocks.MockIPayload)
+		setup  func() (*mocks.MockITaskRepository, *mocks.MockIPayloadConstruct)
 		input  func() (context.Context, *entities.GetAllTasksRequest)
 		verify func(t *testing.T, got *entities.GetAllTasksResponse, gotErr error)
 	}{
 		{
 			name: "GetAllTasks_OK",
-			setup: func() (*mocks.MockITaskRepository, *mocks.MockIPayload) {
+			setup: func() (*mocks.MockITaskRepository, *mocks.MockIPayloadConstruct) {
 				mockTaskRepo := new(mocks.MockITaskRepository)
-				mockPayload := new(mocks.MockIPayload)
+				mockPayload := new(mocks.MockIPayloadConstruct)
 
 				mockPayload.EXPECT().
 					GetAuthPayload(ctx, mock.Anything).
@@ -855,9 +855,9 @@ func TestTaskService_GetAllTasks(t *testing.T) {
 		},
 		{
 			name: "GetAllTasks_NoAuthorization",
-			setup: func() (*mocks.MockITaskRepository, *mocks.MockIPayload) {
+			setup: func() (*mocks.MockITaskRepository, *mocks.MockIPayloadConstruct) {
 				mockTaskRepo := new(mocks.MockITaskRepository)
-				mockPayload := new(mocks.MockIPayload)
+				mockPayload := new(mocks.MockIPayloadConstruct)
 
 				mockPayload.EXPECT().
 					GetAuthPayload(ctx, mock.Anything).
@@ -875,9 +875,9 @@ func TestTaskService_GetAllTasks(t *testing.T) {
 		},
 		{
 			name: "GetAllTasks_GetAllTasksError",
-			setup: func() (*mocks.MockITaskRepository, *mocks.MockIPayload) {
+			setup: func() (*mocks.MockITaskRepository, *mocks.MockIPayloadConstruct) {
 				mockTaskRepo := new(mocks.MockITaskRepository)
-				mockPayload := new(mocks.MockIPayload)
+				mockPayload := new(mocks.MockIPayloadConstruct)
 
 				mockPayload.EXPECT().
 					GetAuthPayload(ctx, mock.Anything).

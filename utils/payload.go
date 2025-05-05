@@ -6,14 +6,28 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+	"github.com/guncv/tech-exam-software-engineering/config"
 	constants "github.com/guncv/tech-exam-software-engineering/constant"
 	"github.com/guncv/tech-exam-software-engineering/infras/log"
 )
 
 // IPayload is the interface for the payload
-type IPayload interface {
-	Valid() error
+type IPayloadConstruct interface {
+	NewCreatePayload(userId string, duration time.Duration) (*Payload, error)
 	GetAuthPayload(ctx context.Context, log *log.Logger) (*Payload, error)
+	Valid(payload *Payload) error
+}
+
+type PayloadConstruct struct {
+	config *config.Config
+	log    *log.Logger
+}
+
+func NewPayloadConstruct(config *config.Config, log *log.Logger) IPayloadConstruct {
+	return &PayloadConstruct{
+		config: config,
+		log:    log,
+	}
 }
 
 // Payload contains the payload data of the token
@@ -25,7 +39,7 @@ type Payload struct {
 }
 
 // NewPayload creates a new token payload with a specific username and duration
-func NewPayload(userId string, duration time.Duration) (IPayload, error) {
+func (p PayloadConstruct) NewCreatePayload(userId string, duration time.Duration) (*Payload, error) {
 	tokenID, err := uuid.NewRandom()
 	if err != nil {
 		return nil, err
@@ -42,7 +56,7 @@ func NewPayload(userId string, duration time.Duration) (IPayload, error) {
 }
 
 // GetAuthPayload gets the auth payload from the context
-func (payload *Payload) GetAuthPayload(ctx context.Context, log *log.Logger) (*Payload, error) {
+func (p PayloadConstruct) GetAuthPayload(ctx context.Context, log *log.Logger) (*Payload, error) {
 	log.DebugWithID(ctx, "[Utils: GetAuthPayload] Getting auth payload")
 	raw := ctx.Value(constants.AuthorizationPayloadKey)
 	payload, ok := raw.(*Payload)
@@ -56,7 +70,7 @@ func (payload *Payload) GetAuthPayload(ctx context.Context, log *log.Logger) (*P
 }
 
 // Valid checks if the token payload is valid or not
-func (payload *Payload) Valid() error {
+func (p PayloadConstruct) Valid(payload *Payload) error {
 	if time.Now().After(payload.ExpiredAt) {
 		return constants.ErrExpiredToken
 	}
