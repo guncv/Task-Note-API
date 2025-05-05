@@ -1,19 +1,122 @@
-basePath: /api/v1
+basePath: /
 definitions:
+  entities.CreateTaskResponse:
+    properties:
+      created_at:
+        type: string
+      description:
+        type: string
+      id:
+        type: string
+      image:
+        type: string
+      status:
+        type: string
+      title:
+        type: string
+      user_id:
+        type: string
+    type: object
+  entities.GetAllTasksResponse:
+    properties:
+      tasks:
+        items:
+          $ref: '#/definitions/entities.GetTaskResponse'
+        type: array
+      total:
+        type: integer
+    type: object
   entities.GetHealthUserResponse:
     properties:
       status:
         type: string
     type: object
+  entities.GetTaskResponse:
+    properties:
+      created_at:
+        type: string
+      description:
+        type: string
+      id:
+        type: string
+      image:
+        type: string
+      status:
+        type: string
+      title:
+        type: string
+      user_id:
+        type: string
+    type: object
+  entities.LoginRequest:
+    properties:
+      email:
+        type: string
+      password:
+        minLength: 8
+        type: string
+    required:
+    - email
+    - password
+    type: object
+  entities.LoginResponse:
+    properties:
+      token:
+        type: string
+    type: object
+  entities.RegisterRequest:
+    properties:
+      email:
+        type: string
+      first_name:
+        type: string
+      last_name:
+        type: string
+      password:
+        minLength: 8
+        type: string
+    required:
+    - email
+    - first_name
+    - last_name
+    - password
+    type: object
+  entities.UpdateTaskResponse:
+    properties:
+      created_at:
+        type: string
+      description:
+        type: string
+      id:
+        type: string
+      image:
+        type: string
+      status:
+        type: string
+      title:
+        type: string
+      user_id:
+        type: string
+    type: object
+externalDocs:
+  description: OpenAPI
+  url: https://swagger.io/resources/open-api/
 host: localhost:8080
 info:
-  contact: {}
+  contact:
+    email: support@swagger.io
+    name: API Support
+    url: http://www.swagger.io/support
   description: This is a sample Hugeman Assignment backend using Go and Swagger. The
     project serves as a backend API for managing tasks and users.
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+  termsOfService: http://swagger.io/terms/
   title: Tech Exam Hugeman Assignment API
-  version: "1"
+  version: "1.0"
 paths:
-  /v1/health:
+  /api/v1/health:
     get:
       description: Returns status
       responses:
@@ -23,5 +126,216 @@ paths:
             $ref: '#/definitions/entities.GetHealthUserResponse'
       summary: Health Check
       tags:
-      - Health
+      - Health Check
+  /api/v1/tasks:
+    get:
+      consumes:
+      - application/json
+      description: Get all tasks with optional search, sort, and pagination
+      parameters:
+      - description: Search by title or description
+        in: query
+        name: search
+        type: string
+      - description: 'Sort by field: title, created_at, status'
+        in: query
+        name: sort_by
+        type: string
+      - description: 'Order: asc or desc'
+        in: query
+        name: order
+        type: string
+      - description: Number of items per page (default 20)
+        in: query
+        name: limit
+        type: integer
+      - description: Offset (default 0)
+        in: query
+        name: offset
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/entities.GetAllTasksResponse'
+      security:
+      - BearerAuth: []
+      summary: Get All Tasks
+      tags:
+      - Tasks
+    post:
+      consumes:
+      - multipart/form-data
+      description: Create a new task
+      parameters:
+      - description: Title
+        in: formData
+        name: title
+        required: true
+        type: string
+      - description: Description
+        in: formData
+        name: description
+        type: string
+      - description: Status
+        in: formData
+        name: status
+        required: true
+        type: string
+      - description: Date
+        in: formData
+        name: date
+        required: true
+        type: string
+      - description: Image
+        in: formData
+        name: image
+        type: file
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/entities.CreateTaskResponse'
+      security:
+      - BearerAuth: []
+      summary: Create Task
+      tags:
+      - Tasks
+  /api/v1/tasks/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete a task by ID
+      parameters:
+      - description: Task ID
+        in: path
+        name: id
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+      security:
+      - BearerAuth: []
+      summary: Delete Task
+      tags:
+      - Tasks
+    get:
+      consumes:
+      - application/json
+      description: Get a task by ID
+      parameters:
+      - description: Task ID
+        in: path
+        name: id
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/entities.GetTaskResponse'
+      security:
+      - BearerAuth: []
+      summary: Get Task
+      tags:
+      - Tasks
+    put:
+      consumes:
+      - multipart/form-data
+      description: Update a task by ID
+      parameters:
+      - description: Task ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Title
+        in: formData
+        name: title
+        type: string
+      - description: Description
+        in: formData
+        name: description
+        type: string
+      - description: Status
+        in: formData
+        name: status
+        type: string
+      - description: Image
+        in: formData
+        name: image
+        type: file
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/entities.UpdateTaskResponse'
+      security:
+      - BearerAuth: []
+      summary: Update Task
+      tags:
+      - Tasks
+  /api/v1/users/login:
+    post:
+      consumes:
+      - application/json
+      description: Login a user with email and password
+      parameters:
+      - description: Login request
+        in: body
+        name: loginRequest
+        required: true
+        schema:
+          $ref: '#/definitions/entities.LoginRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/entities.LoginResponse'
+        "400":
+          description: Bad Request
+        "401":
+          description: Unauthorized
+        "500":
+          description: Internal Server Error
+      summary: Login a user
+      tags:
+      - Users
+  /api/v1/users/register:
+    post:
+      consumes:
+      - application/json
+      description: Register a new user with email and password
+      parameters:
+      - description: Register request
+        in: body
+        name: registerRequest
+        required: true
+        schema:
+          $ref: '#/definitions/entities.RegisterRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+        "400":
+          description: Bad Request
+        "500":
+          description: Internal Server Error
+      summary: Register a new user
+      tags:
+      - Users
+securityDefinitions:
+  BasicAuth:
+    type: basic
+  BearerAuth:
+    description: Type "Bearer" followed by a space and JWT token.
+    in: header
+    name: Authorization
+    type: apiKey
 swagger: "2.0"

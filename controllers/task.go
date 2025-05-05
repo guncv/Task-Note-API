@@ -4,9 +4,11 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	constants "github.com/guncv/tech-exam-software-engineering/constant"
 	"github.com/guncv/tech-exam-software-engineering/entities"
 	"github.com/guncv/tech-exam-software-engineering/infras/log"
 	"github.com/guncv/tech-exam-software-engineering/services"
+	"github.com/guncv/tech-exam-software-engineering/utils"
 )
 
 type TaskController struct {
@@ -21,11 +23,11 @@ func NewTaskController(service services.ITaskService, log *log.Logger) *TaskCont
 	}
 }
 
+// @Tags Health Check
 // @Summary Health Check
 // @Description Returns status
 // @Success 200 {object} entities.GetHealthUserResponse
-// @Tags Health
-// @Router /v1/health [get]
+// @Router /api/v1/health [get]
 // HealthCheck handles the health check endpoint
 func (h *TaskController) HealthCheck(c *gin.Context) {
 	reqCtx := c.Request.Context()
@@ -33,7 +35,7 @@ func (h *TaskController) HealthCheck(c *gin.Context) {
 	response, err := h.service.HealthCheck(reqCtx)
 	if err != nil {
 		h.log.ErrorWithID(reqCtx, "[Controller: HealthCheck]: Failed to perform health check", err)
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to health check"})
+		utils.ErrorResponse(c, err)
 		return
 	}
 
@@ -41,6 +43,7 @@ func (h *TaskController) HealthCheck(c *gin.Context) {
 	c.JSON(http.StatusOK, response)
 }
 
+// @Tags Tasks
 // @Summary Create Task
 // @Description Create a new task
 // @Accept multipart/form-data
@@ -49,8 +52,9 @@ func (h *TaskController) HealthCheck(c *gin.Context) {
 // @Param status formData string true "Status"
 // @Param date formData string true "Date"
 // @Param image formData file false "Image"
+// @Security BearerAuth
 // @Success 200 {object} entities.CreateTaskResponse
-// @Router /v1/tasks [post]
+// @Router /api/v1/tasks [post]
 func (h *TaskController) CreateTask(c *gin.Context) {
 	ctx := c.Request.Context()
 	h.log.DebugWithID(ctx, "[Controller: CreateTask] Called")
@@ -59,7 +63,7 @@ func (h *TaskController) CreateTask(c *gin.Context) {
 	// Bind request
 	if err := c.ShouldBind(&req); err != nil {
 		h.log.ErrorWithID(ctx, "[Controller: CreateTask]: Failed to bind request", err)
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid form data"})
+		utils.ErrorResponse(c, constants.ErrInvalidRequestBody)
 		return
 	}
 
@@ -67,20 +71,22 @@ func (h *TaskController) CreateTask(c *gin.Context) {
 	response, err := h.service.CreateTask(ctx, &req)
 	if err != nil {
 		h.log.ErrorWithID(ctx, "[Controller: CreateTask]: Failed to create task", err)
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create task"})
+		utils.ErrorResponse(c, err)
 		return
 	}
 
 	h.log.InfoWithID(ctx, "[Controller: CreateTask]: Task created successfully")
-	c.JSON(http.StatusOK, gin.H{"message": "Task created successfully", "task": response})
+	c.JSON(http.StatusOK, response)
 }
 
+// @Tags Tasks
 // @Summary Get Task
 // @Description Get a task by ID
 // @Accept json
 // @Param id path string true "Task ID"
+// @Security BearerAuth
 // @Success 200 {object} entities.GetTaskResponse
-// @Router /v1/tasks/{id} [get]
+// @Router /api/v1/tasks/{id} [get]
 func (h *TaskController) GetTask(c *gin.Context) {
 	ctx := c.Request.Context()
 	h.log.DebugWithID(ctx, "[Controller: GetTask] Called")
@@ -88,7 +94,7 @@ func (h *TaskController) GetTask(c *gin.Context) {
 	// Get task id from path
 	id := c.Param("id")
 	if id == "" {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Missing task ID in path"})
+		utils.ErrorResponse(c, constants.ErrInvalidRequestParam)
 		return
 	}
 
@@ -96,7 +102,7 @@ func (h *TaskController) GetTask(c *gin.Context) {
 	response, err := h.service.GetTask(ctx, id)
 	if err != nil {
 		h.log.ErrorWithID(ctx, "[Controller: GetTask]: Failed to get task", err)
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to get task"})
+		utils.ErrorResponse(c, err)
 		return
 	}
 
@@ -104,6 +110,7 @@ func (h *TaskController) GetTask(c *gin.Context) {
 	c.JSON(http.StatusOK, response)
 }
 
+// @Tags Tasks
 // @Summary Update Task
 // @Description Update a task by ID
 // @Accept multipart/form-data
@@ -112,8 +119,9 @@ func (h *TaskController) GetTask(c *gin.Context) {
 // @Param description formData string false "Description"
 // @Param status formData string false "Status"
 // @Param image formData file false "Image"
+// @Security BearerAuth
 // @Success 200 {object} entities.UpdateTaskResponse
-// @Router /v1/tasks/{id} [put]
+// @Router /api/v1/tasks/{id} [put]
 func (h *TaskController) UpdateTask(c *gin.Context) {
 	ctx := c.Request.Context()
 	h.log.DebugWithID(ctx, "[Controller: UpdateTask] Called")
@@ -121,7 +129,7 @@ func (h *TaskController) UpdateTask(c *gin.Context) {
 	// Get task id from path
 	id := c.Param("id")
 	if id == "" {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Missing task ID in path"})
+		utils.ErrorResponse(c, constants.ErrInvalidRequestParam)
 		return
 	}
 
@@ -129,7 +137,7 @@ func (h *TaskController) UpdateTask(c *gin.Context) {
 	var req entities.UpdateTaskRequest
 	if err := c.ShouldBind(&req); err != nil {
 		h.log.ErrorWithID(ctx, "[Controller: UpdateTask]: Failed to bind request", err)
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid form data"})
+		utils.ErrorResponse(c, constants.ErrInvalidRequestBody)
 		return
 	}
 
@@ -137,7 +145,7 @@ func (h *TaskController) UpdateTask(c *gin.Context) {
 	response, err := h.service.UpdateTask(ctx, id, &req)
 	if err != nil {
 		h.log.ErrorWithID(ctx, "[Controller: UpdateTask]: Failed to update task", err)
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update task"})
+		utils.ErrorResponse(c, err)
 		return
 	}
 
@@ -145,12 +153,14 @@ func (h *TaskController) UpdateTask(c *gin.Context) {
 	c.JSON(http.StatusOK, response)
 }
 
+// @Tags Tasks
 // @Summary Delete Task
 // @Description Delete a task by ID
 // @Accept json
 // @Param id path string true "Task ID"
-// @Success 200 {object} entities.DeleteTaskResponse
-// @Router /v1/tasks/{id} [delete]
+// @Security BearerAuth
+// @Success 200
+// @Router /api/v1/tasks/{id} [delete]
 func (h *TaskController) DeleteTask(c *gin.Context) {
 	ctx := c.Request.Context()
 	h.log.DebugWithID(ctx, "[Controller: DeleteTask] Called")
@@ -158,14 +168,14 @@ func (h *TaskController) DeleteTask(c *gin.Context) {
 	// Get task id from path
 	id := c.Param("id")
 	if id == "" {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Missing task ID in path"})
+		utils.ErrorResponse(c, constants.ErrInvalidRequestParam)
 		return
 	}
 
 	// Delete task
 	if err := h.service.DeleteTask(ctx, id); err != nil {
 		h.log.ErrorWithID(ctx, "[Controller: DeleteTask]: Failed to delete task", err)
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to delete task"})
+		utils.ErrorResponse(c, err)
 		return
 	}
 
@@ -173,6 +183,7 @@ func (h *TaskController) DeleteTask(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"message": "Task deleted successfully"})
 }
 
+// @Tags Tasks
 // @Summary Get All Tasks
 // @Description Get all tasks with optional search, sort, and pagination
 // @Accept json
@@ -182,10 +193,9 @@ func (h *TaskController) DeleteTask(c *gin.Context) {
 // @Param order query string false "Order: asc or desc"
 // @Param limit query int false "Number of items per page (default 20)"
 // @Param offset query int false "Offset (default 0)"
+// @Security BearerAuth
 // @Success 200 {object} entities.GetAllTasksResponse
-// @Failure 400 {object} gin.H{"error": "Invalid query parameters"}
-// @Failure 500 {object} gin.H{"error": "Failed to get all tasks"}
-// @Router /v1/tasks [get]
+// @Router /api/v1/tasks [get]
 func (h *TaskController) GetAllTasks(c *gin.Context) {
 	ctx := c.Request.Context()
 	h.log.DebugWithID(ctx, "[Controller: GetAllTasks] Called")
@@ -193,14 +203,14 @@ func (h *TaskController) GetAllTasks(c *gin.Context) {
 	var req entities.GetAllTasksRequest
 	if err := c.ShouldBindQuery(&req); err != nil {
 		h.log.ErrorWithID(ctx, "[Controller: GetAllTasks]: Invalid query params", err)
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid query parameters"})
+		utils.ErrorResponse(c, constants.ErrInvalidQueryRequestParam)
 		return
 	}
 
 	response, err := h.service.GetAllTasks(ctx, &req)
 	if err != nil {
 		h.log.ErrorWithID(ctx, "[Controller: GetAllTasks]: Failed to get all tasks", err)
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to get all tasks"})
+		utils.ErrorResponse(c, err)
 		return
 	}
 

@@ -17,6 +17,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 	"golang.org/x/crypto/bcrypt"
+	"gorm.io/gorm"
 )
 
 func TestUserService_RegisterUser(t *testing.T) {
@@ -62,6 +63,30 @@ func TestUserService_RegisterUser(t *testing.T) {
 				assert.Equal(t, okResponseEntity.LastName, got.LastName)
 
 				assert.NoError(t, gotErr)
+			},
+		},
+		{
+			name: "RegisterUser_DuplicateUserError",
+			setup: func() *mocks.MockIUserRepository {
+				mockUserRepo := new(mocks.MockIUserRepository)
+
+				mockUserRepo.EXPECT().
+					RegisterUser(ctx, mock.MatchedBy(func(user *models.User) bool {
+						return user.Email == okResponseEntity.Email &&
+							user.FirstName == okResponseEntity.FirstName &&
+							user.LastName == okResponseEntity.LastName &&
+							user.Password != ""
+					})).
+					Return(errors.New("duplicate key value violates unique constraint"))
+				return mockUserRepo
+			},
+			input: func() (context.Context, *entities.RegisterRequest) {
+				return ctx, okResponseEntity
+			},
+			verify: func(t *testing.T, got *entities.RegisterResponse, gotErr error) {
+				assert.Equal(t, (*entities.RegisterResponse)(nil), got)
+				assert.Error(t, gotErr)
+				assert.Equal(t, constants.ErrUserAlreadyExists, gotErr)
 			},
 		},
 		{
@@ -173,6 +198,26 @@ func TestUserService_LoginUser(t *testing.T) {
 			verify: func(t *testing.T, got *entities.LoginResponse, gotErr error) {
 				assert.Nil(t, got)
 				assert.Error(t, gotErr)
+			},
+		}, {
+			name: "LoginUser_GetUserNotFoundError",
+			setup: func() (*mocks.MockIUserRepository, *mocks.MockIPasetoMaker) {
+				mockUserRepo := new(mocks.MockIUserRepository)
+				mockTokenMaker := new(mocks.MockIPasetoMaker)
+
+				mockUserRepo.EXPECT().
+					GetUser(ctx, loginRequestEntity.Email).
+					Return(nil, gorm.ErrRecordNotFound)
+
+				return mockUserRepo, mockTokenMaker
+			},
+			input: func() (context.Context, *entities.LoginRequest) {
+				return ctx, loginRequestEntity
+			},
+			verify: func(t *testing.T, got *entities.LoginResponse, gotErr error) {
+				assert.Nil(t, got)
+				assert.Error(t, gotErr)
+				assert.Equal(t, constants.ErrUserNotFound, gotErr)
 			},
 		},
 		{

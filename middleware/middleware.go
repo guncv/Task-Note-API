@@ -2,7 +2,6 @@ package middleware
 
 import (
 	"context"
-	"net/http"
 	"strings"
 
 	"github.com/gin-gonic/gin"
@@ -17,21 +16,21 @@ func AuthMiddleware(tokenMaker utils.IPasetoMaker, log *log.Logger) gin.HandlerF
 		authorizationHeader := ctx.GetHeader(constants.AuthorizationHeaderKey)
 		if len(authorizationHeader) == 0 {
 			log.ErrorWithID(ctx, "[Middleware: AuthMiddleware] Authorization header is not provided")
-			ctx.AbortWithStatusJSON(http.StatusUnauthorized, utils.ErrorResponse(constants.ErrAuthorizationHeaderNotProvided))
+			utils.AbortWithErrorResponse(ctx, constants.ErrAuthHeaderMissing)
 			return
 		}
 
 		fields := strings.Fields(authorizationHeader)
 		if len(fields) < 2 {
 			log.ErrorWithID(ctx, "[Middleware: AuthMiddleware] Invalid authorization header format")
-			ctx.AbortWithStatusJSON(http.StatusUnauthorized, utils.ErrorResponse(constants.ErrInvalidAuthorizationHeaderFormat))
+			utils.AbortWithErrorResponse(ctx, constants.ErrAuthHeaderFormatInvalid)
 			return
 		}
 
 		authorizationType := strings.ToLower(fields[0])
 		if authorizationType != constants.AuthorizationTypeBearer {
 			log.ErrorWithID(ctx, "[Middleware: AuthMiddleware] Authorization header must start with "+constants.AuthorizationTypeBearer)
-			ctx.AbortWithStatusJSON(http.StatusUnauthorized, utils.ErrorResponse(constants.ErrAuthorizationHeaderMustStartWithBearer))
+			utils.AbortWithErrorResponse(ctx, constants.ErrAuthHeaderMissingBearer)
 			return
 		}
 
@@ -39,7 +38,7 @@ func AuthMiddleware(tokenMaker utils.IPasetoMaker, log *log.Logger) gin.HandlerF
 		payload, err := tokenMaker.VerifyToken(accessToken)
 		if err != nil {
 			log.ErrorWithID(ctx, "[Middleware: AuthMiddleware] Failed to verify token", err)
-			ctx.AbortWithStatusJSON(http.StatusUnauthorized, utils.ErrorResponse(constants.ErrFailedToVerifyToken))
+			utils.AbortWithErrorResponse(ctx, constants.ErrFailedToVerifyToken)
 			return
 		}
 

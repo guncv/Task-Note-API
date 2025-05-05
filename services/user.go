@@ -2,15 +2,18 @@ package services
 
 import (
 	"context"
+	"errors"
+	"strings"
 
 	"github.com/google/uuid"
 	"github.com/guncv/tech-exam-software-engineering/config"
+	constants "github.com/guncv/tech-exam-software-engineering/constant"
 	"github.com/guncv/tech-exam-software-engineering/entities"
 	"github.com/guncv/tech-exam-software-engineering/infras/log"
 	"github.com/guncv/tech-exam-software-engineering/models"
 	"github.com/guncv/tech-exam-software-engineering/repositories"
 	"github.com/guncv/tech-exam-software-engineering/utils"
-	"github.com/lib/pq"
+	"gorm.io/gorm"
 )
 
 type IUserService interface {
@@ -44,7 +47,7 @@ func (s *UserService) RegisterUser(ctx context.Context, req *entities.RegisterRe
 	hashedPassword, err := utils.HashPassword(ctx, req.Password, s.log)
 	if err != nil {
 		s.log.ErrorWithID(ctx, "[Service: RegisterUser] Failed to hash password: ", err)
-		return nil, err
+		return nil, constants.ErrHashPassword
 	}
 
 	arg := models.User{
@@ -56,13 +59,11 @@ func (s *UserService) RegisterUser(ctx context.Context, req *entities.RegisterRe
 	}
 
 	if err = s.repo.RegisterUser(ctx, &arg); err != nil {
-		if pqErr, ok := err.(*pq.Error); ok {
-			switch pqErr.Code.Name() {
-			case "unique_violation":
-				s.log.ErrorWithID(ctx, "[Service: RegisterUser] Failed to register user: ", err)
-				return nil, err
-			}
+		if strings.Contains(err.Error(), "duplicate key value violates unique constraint") {
+			s.log.ErrorWithID(ctx, "[Service: RegisterUser] Duplicate user", err)
+			return nil, constants.ErrUserAlreadyExists
 		}
+
 		s.log.ErrorWithID(ctx, "[Service: RegisterUser] Failed to register user: ", err)
 		return nil, err
 	}
@@ -84,14 +85,17 @@ func (s *UserService) LoginUser(ctx context.Context, req *entities.LoginRequest)
 
 	user, err := s.repo.GetUser(ctx, req.Email)
 	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			s.log.ErrorWithID(ctx, "[Service: LoginUser] User not found: ", err)
+			return nil, constants.ErrUserNotFound
+		}
 		s.log.ErrorWithID(ctx, "[Service: LoginUser] Failed to get user: ", err)
 		return nil, err
 	}
-	s.log.DebugWithID(ctx, "[Service: LoginUser] User found: ", user.ID.String())
 
 	if err = utils.CheckPassword(ctx, req.Password, user.Password, s.log); err != nil {
 		s.log.ErrorWithID(ctx, "[Service: LoginUser] Failed to check password: ", err)
-		return nil, err
+		return nil, constants.ErrPasswordIncorrect
 	}
 
 	accessToken, err := s.tokenMaker.CreateToken(

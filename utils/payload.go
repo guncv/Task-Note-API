@@ -2,7 +2,6 @@ package utils
 
 import (
 	"context"
-	"errors"
 	"time"
 
 	"github.com/google/uuid"
@@ -62,7 +61,7 @@ func (p PayloadConstruct) GetAuthPayload(ctx context.Context, log *log.Logger) (
 	payload, ok := raw.(*Payload)
 	if !ok || payload == nil {
 		log.ErrorWithID(ctx, "[Utils: GetAuthPayload] Unauthorized: token payload missing")
-		return nil, errors.New("unauthorized: token payload missing")
+		return nil, constants.ErrUnauthorized
 	}
 
 	log.DebugWithID(ctx, "[Utils: GetAuthPayload] Auth payload found", payload)

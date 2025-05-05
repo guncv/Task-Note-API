@@ -1,7 +1,7 @@
 package utils
 
 import (
-	"fmt"
+	"errors"
 	"time"
 
 	"github.com/aead/chacha20poly1305"
@@ -24,7 +24,7 @@ type PasetoMaker struct {
 
 func NewPasetoMaker(config *config.Config, payloadConstruct IPayloadConstruct) (IPasetoMaker, error) {
 	if len(config.TokenConfig.TokenSymmetricKey) != chacha20poly1305.KeySize {
-		return nil, fmt.Errorf("invalid key size: mush be exactly %d characters", chacha20poly1305.KeySize)
+		return nil, errors.New("invalid key size: must be exactly 32 bytes")
 	}
 
 	maker := &PasetoMaker{

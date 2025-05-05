@@ -2,6 +2,7 @@ package services
 
 import (
 	"context"
+	"errors"
 	"time"
 
 	"github.com/google/uuid"
@@ -11,6 +12,8 @@ import (
 	"github.com/guncv/tech-exam-software-engineering/models"
 	"github.com/guncv/tech-exam-software-engineering/repositories"
 	"github.com/guncv/tech-exam-software-engineering/utils"
+	"github.com/lib/pq"
+	"gorm.io/gorm"
 )
 
 type ITaskService interface {
@@ -44,7 +47,7 @@ func (s *TaskService) HealthCheck(ctx context.Context) (*entities.GetHealthUserR
 	s.log.DebugWithID(ctx, "[Service: HealthCheck] Called:")
 	status, err := s.repo.HealthCheck(ctx)
 	if err != nil {
-		s.log.ErrorWithID(ctx, "[Service: HealthCheck] Failed to health check")
+		s.log.ErrorWithID(ctx, "[Service: HealthCheck] Failed to health check", err)
 		return nil, err
 	}
 
@@ -93,6 +96,13 @@ func (s *TaskService) CreateTask(ctx context.Context, req *entities.CreateTaskRe
 
 	// Create task in repository
 	if err := s.repo.CreateTask(ctx, arg); err != nil {
+		if pqErr, ok := err.(*pq.Error); ok {
+			switch pqErr.Code.Name() {
+			case "unique_violation":
+				s.log.ErrorWithID(ctx, "[Service: CreateTask] Failed to create task", err)
+				return nil, constants.ErrTaskAlreadyExists
+			}
+		}
 		s.log.ErrorWithID(ctx, "[Service: CreateTask] Failed to create task", err)
 		return nil, err
 	}
@@ -126,6 +136,11 @@ func (s *TaskService) GetTask(ctx context.Context, req string) (*entities.GetTas
 	// Get task from repository
 	repoResponse, err := s.repo.GetTask(ctx, req)
 	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			s.log.ErrorWithID(ctx, "[Service: UpdateTask] Task not found: ", err)
+			return nil, constants.ErrTaskNotFound
+		}
+
 		s.log.ErrorWithID(ctx, "[Service: GetTask] Failed to get task", err)
 		return nil, err
 	}
@@ -164,6 +179,11 @@ func (s *TaskService) UpdateTask(ctx context.Context, id string, req *entities.U
 	// Get existing task
 	existingTask, err := s.repo.GetTask(ctx, id)
 	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			s.log.ErrorWithID(ctx, "[Service: UpdateTask] Task not found: ", err)
+			return nil, constants.ErrTaskNotFound
+		}
+
 		s.log.ErrorWithID(ctx, "[Service: UpdateTask] Failed to get task", err)
 		return nil, err
 	}
@@ -227,6 +247,11 @@ func (s *TaskService) DeleteTask(ctx context.Context, id string) error {
 	// Get existing task
 	existingTask, err := s.repo.GetTask(ctx, id)
 	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			s.log.ErrorWithID(ctx, "[Service: DeleteTask] Task not found: ", err)
+			return constants.ErrTaskNotFound
+		}
+
 		s.log.ErrorWithID(ctx, "[Service: DeleteTask] Failed to get task", err)
 		return err
 	}

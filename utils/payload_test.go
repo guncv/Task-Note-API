@@ -44,5 +44,5 @@ func TestPayload_GetAuthPayload(t *testing.T) {
 
 	_, err = NewPayloadConstruct(config, log).GetAuthPayload(ctx, log)
 	require.Error(t, err)
-	require.EqualError(t, err, "unauthorized: token payload missing")
+	require.EqualError(t, err, constants.ErrUnauthorized.Error())
 }

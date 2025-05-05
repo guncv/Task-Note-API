@@ -1,14 +1,15 @@
 package controllers
 
 import (
-	"database/sql"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
 
+	constants "github.com/guncv/tech-exam-software-engineering/constant"
 	"github.com/guncv/tech-exam-software-engineering/entities"
 	"github.com/guncv/tech-exam-software-engineering/infras/log"
 	"github.com/guncv/tech-exam-software-engineering/services"
+	"github.com/guncv/tech-exam-software-engineering/utils"
 )
 
 type UserController struct {
@@ -23,28 +24,29 @@ func NewUserController(service services.IUserService, log *log.Logger) *UserCont
 	}
 }
 
+// @Tags Users
 // @Summary Register a new user
 // @Description Register a new user with email and password
 // @Accept json
 // @Produce json
 // @Param registerRequest body entities.RegisterRequest true "Register request"
-// @Success 200 {object} entities.RegisterResponse
-// @Failure 400 {object} gin.H{"error": "Invalid request"}
-// @Failure 500 {object} gin.H{"error": "Failed to register user"}
-// @Router /v1/users/register [post]
+// @Success 200
+// @Failure 400
+// @Failure 500
+// @Router /api/v1/users/register [post]
 func (c *UserController) Register(ctx *gin.Context) {
 	c.log.DebugWithID(ctx, "[Controller: Register] Called")
 	var req entities.RegisterRequest
 	if err := ctx.ShouldBindJSON(&req); err != nil {
 		c.log.ErrorWithID(ctx, "[Controller: Register] Failed to bind request: ", err)
-		ctx.JSON(http.StatusBadRequest, err)
+		utils.ErrorResponse(ctx, constants.ErrInvalidRequestBody)
 		return
 	}
 
 	resp, err := c.service.RegisterUser(ctx, &req)
 	if err != nil {
 		c.log.ErrorWithID(ctx, "[Controller: Register] Failed to register user: ", err)
-		ctx.JSON(http.StatusInternalServerError, err)
+		utils.ErrorResponse(ctx, err)
 		return
 	}
 
@@ -52,34 +54,30 @@ func (c *UserController) Register(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, resp)
 }
 
+// @Tags Users
 // @Summary Login a user
 // @Description Login a user with email and password
 // @Accept json
 // @Produce json
 // @Param loginRequest body entities.LoginRequest true "Login request"
 // @Success 200 {object} entities.LoginResponse
-// @Failure 400 {object} gin.H{"error": "Invalid request"}
-// @Failure 401 {object} gin.H{"error": "Invalid credentials"}
-// @Failure 500 {object} gin.H{"error": "Failed to login user"}
-// @Router /v1/users/login [post]
+// @Failure 400
+// @Failure 401
+// @Failure 500
+// @Router /api/v1/users/login [post]
 func (c *UserController) Login(ctx *gin.Context) {
 	c.log.DebugWithID(ctx, "[Controller: Login] Called")
 	var req entities.LoginRequest
 	if err := ctx.ShouldBindJSON(&req); err != nil {
 		c.log.ErrorWithID(ctx, "[Controller: Login] Failed to bind request: ", err)
-		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		utils.ErrorResponse(ctx, constants.ErrInvalidRequestBody)
 		return
 	}
 
 	resp, err := c.service.LoginUser(ctx, &req)
 	if err != nil {
-		if err == sql.ErrNoRows {
-			c.log.ErrorWithID(ctx, "[Controller: Login] Failed to get user: ", err)
-			ctx.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
-			return
-		}
 		c.log.ErrorWithID(ctx, "[Controller: Login] Failed to login user: ", err)
-		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		utils.ErrorResponse(ctx, err)
 		return
 	}
 

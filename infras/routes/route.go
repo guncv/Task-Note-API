@@ -45,6 +45,7 @@ func RegisterRoutes(e *gin.Engine, c *dig.Container, tokenMaker utils.IPasetoMak
 	}
 }
 
+// Task Routes
 func taskRoutes(eg *gin.RouterGroup, taskController *controllers.TaskController) {
 	tasks := eg.Group("/tasks")
 	tasks.POST("", taskController.CreateTask)
@@ -54,6 +55,7 @@ func taskRoutes(eg *gin.RouterGroup, taskController *controllers.TaskController)
 	tasks.DELETE("/:id", taskController.DeleteTask)
 }
 
+// User Routes
 func userRoutes(eg *gin.RouterGroup, userController *controllers.UserController) {
 	users := eg.Group("/users")
 	users.POST("", userController.Register)

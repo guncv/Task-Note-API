@@ -13,8 +13,10 @@ import (
 	"github.com/guncv/tech-exam-software-engineering/mocks"
 	"github.com/guncv/tech-exam-software-engineering/models"
 	"github.com/guncv/tech-exam-software-engineering/utils"
+	"github.com/lib/pq"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
+	"gorm.io/gorm"
 )
 
 func TestTaskService_HealthCheck(t *testing.T) {
@@ -194,6 +196,31 @@ func TestTaskService_CreateTask(t *testing.T) {
 				assert.Error(t, gotErr)
 			},
 		},
+		{
+			name: "CreateTask_DuplicateTaskError",
+			setup: func() (*mocks.MockITaskRepository, *mocks.MockIPayloadConstruct) {
+				mockTaskRepo := new(mocks.MockITaskRepository)
+				mockPayload := new(mocks.MockIPayloadConstruct)
+
+				mockPayload.EXPECT().
+					GetAuthPayload(ctx, mock.Anything).
+					Return(okPayload, nil)
+
+				mockTaskRepo.EXPECT().
+					CreateTask(ctx, mock.Anything).
+					Return(&pq.Error{Code: "23505", Message: "duplicate key value violates unique constraint"})
+
+				return mockTaskRepo, mockPayload
+			},
+			input: func() (context.Context, *entities.CreateTaskRequest) {
+				return ctx, okRequest
+			},
+			verify: func(t *testing.T, got *entities.CreateTaskResponse, gotErr error) {
+				assert.Equal(t, (*entities.CreateTaskResponse)(nil), got)
+				assert.Error(t, gotErr)
+				assert.Equal(t, constants.ErrTaskAlreadyExists, gotErr)
+			},
+		},
 	}
 
 	for _, tC := range testCases {
@@ -301,6 +328,33 @@ func TestTaskService_GetTask(t *testing.T) {
 			verify: func(t *testing.T, got *entities.GetTaskResponse, gotErr error) {
 				assert.Equal(t, (*entities.GetTaskResponse)(nil), got)
 				assert.Error(t, gotErr)
+			},
+		},
+		{
+			name: "GetTask_RecordNotFoundError",
+			setup: func() (*mocks.MockITaskRepository, *mocks.MockIPayloadConstruct) {
+				mockTaskRepo := new(mocks.MockITaskRepository)
+				mockPayload := new(mocks.MockIPayloadConstruct)
+
+				mockPayload.EXPECT().
+					GetAuthPayload(ctx, mock.Anything).
+					Return(okPayload, nil)
+
+				mockTaskRepo.EXPECT().
+					GetTask(ctx, mock.MatchedBy(func(id string) bool {
+						return id == requestId
+					})).
+					Return(nil, gorm.ErrRecordNotFound)
+
+				return mockTaskRepo, mockPayload
+			},
+			input: func() (context.Context, string) {
+				return ctx, requestId
+			},
+			verify: func(t *testing.T, got *entities.GetTaskResponse, gotErr error) {
+				assert.Equal(t, (*entities.GetTaskResponse)(nil), got)
+				assert.Error(t, gotErr)
+				assert.Equal(t, constants.ErrTaskNotFound, gotErr)
 			},
 		},
 		{
@@ -512,6 +566,33 @@ func TestTaskService_UpdateTask(t *testing.T) {
 			},
 		},
 		{
+			name: "UpdateTask_RecordNotFoundError",
+			setup: func() (*mocks.MockITaskRepository, *mocks.MockIPayloadConstruct) {
+				mockTaskRepo := new(mocks.MockITaskRepository)
+				mockPayload := new(mocks.MockIPayloadConstruct)
+
+				mockPayload.EXPECT().
+					GetAuthPayload(ctx, mock.Anything).
+					Return(okPayload, nil)
+
+				mockTaskRepo.EXPECT().
+					GetTask(ctx, mock.MatchedBy(func(id string) bool {
+						return id == requestId
+					})).
+					Return(nil, gorm.ErrRecordNotFound)
+
+				return mockTaskRepo, mockPayload
+			},
+			input: func() (context.Context, string, *entities.UpdateTaskRequest) {
+				return ctx, requestId, okRequest
+			},
+			verify: func(t *testing.T, got *entities.UpdateTaskResponse, gotErr error) {
+				assert.Equal(t, (*entities.UpdateTaskResponse)(nil), got)
+				assert.Error(t, gotErr)
+				assert.Equal(t, constants.ErrTaskNotFound, gotErr)
+			},
+		},
+		{
 			name: "UpdateTask_NotMatchUserID",
 			setup: func() (*mocks.MockITaskRepository, *mocks.MockIPayloadConstruct) {
 				mockTaskRepo := new(mocks.MockITaskRepository)
@@ -705,6 +786,32 @@ func TestTaskService_DeleteTask(t *testing.T) {
 			},
 			verify: func(t *testing.T, gotErr error) {
 				assert.Error(t, gotErr)
+			},
+		},
+		{
+			name: "DeleteTask_RecordNotFoundError",
+			setup: func() (*mocks.MockITaskRepository, *mocks.MockIPayloadConstruct) {
+				mockTaskRepo := new(mocks.MockITaskRepository)
+				mockPayload := new(mocks.MockIPayloadConstruct)
+
+				mockPayload.EXPECT().
+					GetAuthPayload(ctx, mock.Anything).
+					Return(okPayload, nil)
+
+				mockTaskRepo.EXPECT().
+					GetTask(ctx, mock.MatchedBy(func(id string) bool {
+						return id == requestId
+					})).
+					Return(nil, gorm.ErrRecordNotFound)
+
+				return mockTaskRepo, mockPayload
+			},
+			input: func() (context.Context, string) {
+				return ctx, requestId
+			},
+			verify: func(t *testing.T, gotErr error) {
+				assert.Error(t, gotErr)
+				assert.Equal(t, constants.ErrTaskNotFound, gotErr)
 			},
 		},
 		{
