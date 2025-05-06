@@ -1,0 +1,16 @@
+with-expecter: true
+issue-845-fix: true
+
+packages:
+  github.com/guncv/tech-exam-software-engineering/repositories:
+    config:
+      dir: mocks               # ⬅️ Root-level "mocks" directory
+      filename: "{{.InterfaceName}}.go"
+      outpkg: mocks
+      recursive: true
+  github.com/guncv/tech-exam-software-engineering/utils:
+    config:
+      dir: mocks
+      filename: "{{.InterfaceName}}.go"
+      outpkg: mocks
+      recursive: true
