@@ -2,9 +2,6 @@ basePath: /
 definitions:
   entities.CreateTaskResponse:
     properties:
-      created_at:
-        example: "2021-09-01T00:00:00Z"
-        type: string
       date:
         example: "2021-09-01T00:00:00Z"
         type: string
@@ -249,13 +246,13 @@ info:
     email: support@swagger.io
     name: API Support
     url: http://www.swagger.io/support
-  description: This is a sample Hugeman Assignment backend using Go and Swagger. The
-    project serves as a backend API for managing tasks and users.
+  description: This is a sample Task-Note backend using Go and Swagger. The project
+    serves as a backend API for managing tasks and users.
   license:
     name: Apache 2.0
     url: http://www.apache.org/licenses/LICENSE-2.0.html
   termsOfService: http://swagger.io/terms/
-  title: Tech Exam Hugeman Assignment API
+  title: Task-Note API
   version: "1.0"
 paths:
   /api/v1/health:

@@ -1,8 +1,8 @@
 {
     "swagger": "2.0",
     "info": {
-        "description": "This is a sample Hugeman Assignment backend using Go and Swagger. The project serves as a backend API for managing tasks and users.",
-        "title": "Tech Exam Hugeman Assignment API",
+        "description": "This is a sample Task-Note backend using Go and Swagger. The project serves as a backend API for managing tasks and users.",
+        "title": "Task-Note API",
         "termsOfService": "http://swagger.io/terms/",
         "contact": {
             "name": "API Support",
@@ -509,10 +509,6 @@
         "entities.CreateTaskResponse": {
             "type": "object",
             "properties": {
-                "created_at": {
-                    "type": "string",
-                    "example": "2021-09-01T00:00:00Z"
-                },
                 "date": {
                     "type": "string",
                     "example": "2021-09-01T00:00:00Z"

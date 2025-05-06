@@ -5,9 +5,9 @@ import (
 	_ "github.com/guncv/tech-exam-software-engineering/docs"
 )
 
-// @title           Tech Exam Hugeman Assignment API
+// @title           Task-Note API
 // @version         1.0
-// @description     This is a sample Hugeman Assignment backend using Go and Swagger. The project serves as a backend API for managing tasks and users.
+// @description     This is a sample Task-Note backend using Go and Swagger. The project serves as a backend API for managing tasks and users.
 // @termsOfService  http://swagger.io/terms/
 
 // @contact.name   API Support

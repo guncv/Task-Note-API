@@ -98,7 +98,6 @@ func TestTaskService_CreateTask(t *testing.T) {
 		Status:      "IN_PROGRESS",
 		Description: nil,
 		Image:       &empty,
-		CreatedAt:   time.Time{},
 	}
 
 	okRequest := &entities.CreateTaskRequest{
@@ -253,7 +252,7 @@ func TestTaskService_GetTask(t *testing.T) {
 		Status:      "IN_PROGRESS",
 		Description: nil,
 		Image:       &empty,
-		CreatedAt:   time.Time{},
+		CreatedAt:   "",
 	}
 
 	okPayload := &utils.Payload{
@@ -451,7 +450,7 @@ func TestTaskService_UpdateTask(t *testing.T) {
 		Status:      "IN_PROGRESS",
 		Description: &description,
 		Image:       &empty,
-		CreatedAt:   time.Time{},
+		CreatedAt:   "",
 	}
 
 	okRequest := &entities.UpdateTaskRequest{

@@ -3,6 +3,7 @@ package services
 import (
 	"context"
 	"errors"
+	"time"
 
 	"github.com/google/uuid"
 	constants "github.com/guncv/tech-exam-software-engineering/constant"
@@ -84,7 +85,7 @@ func (s *TaskService) CreateTask(ctx context.Context, req *entities.CreateTaskRe
 		Image:       &base64Image,
 		Date:        req.Date,
 		Description: req.Description,
-		CreatedAt:   utils.NowBangkok(),
+		CreatedAt:   time.Now(),
 	}
 	s.log.DebugWithID(ctx, "[Service: CreateTask] Task: ", arg)
 
@@ -110,7 +111,6 @@ func (s *TaskService) CreateTask(ctx context.Context, req *entities.CreateTaskRe
 		Date:        arg.Date,
 		Image:       arg.Image,
 		Description: arg.Description,
-		CreatedAt:   arg.CreatedAt,
 	}
 
 	s.log.DebugWithID(ctx, "[Service: CreateTask] Task created successfully", resp)
@@ -153,9 +153,9 @@ func (s *TaskService) GetTask(ctx context.Context, req string) (*entities.GetTas
 		Title:       repoResponse.Title,
 		Status:      repoResponse.Status,
 		Image:       repoResponse.Image,
-		Date:        repoResponse.Date,
+		Date:        utils.FormatBangkokRFC3339(repoResponse.Date),
 		Description: repoResponse.Description,
-		CreatedAt:   repoResponse.CreatedAt,
+		CreatedAt:   utils.FormatBangkokRFC3339(repoResponse.CreatedAt),
 	}
 
 	s.log.DebugWithID(ctx, "[Service: GetTask] Task retrieved successfully", resp)
@@ -224,10 +224,10 @@ func (s *TaskService) UpdateTask(ctx context.Context, id string, req *entities.U
 		UserID:      existingTask.UserID,
 		Title:       existingTask.Title,
 		Status:      existingTask.Status,
-		Date:        existingTask.Date,
+		Date:        utils.FormatBangkokRFC3339(existingTask.Date),
 		Image:       existingTask.Image,
 		Description: existingTask.Description,
-		CreatedAt:   existingTask.CreatedAt,
+		CreatedAt:   utils.FormatBangkokRFC3339(existingTask.CreatedAt),
 	}
 
 	s.log.DebugWithID(ctx, "[Service: UpdateTask] Task updated successfully", resp)
@@ -310,9 +310,9 @@ func (s *TaskService) GetAllTasks(ctx context.Context, req *entities.GetAllTasks
 			Title:       t.Title,
 			Description: t.Description,
 			Image:       t.Image,
-			Date:        t.Date,
+			Date:        utils.FormatBangkokRFC3339(t.Date),
 			Status:      t.Status,
-			CreatedAt:   t.CreatedAt,
+			CreatedAt:   utils.FormatBangkokRFC3339(t.CreatedAt),
 		})
 	}
 

@@ -515,10 +515,6 @@ const docTemplate = `{
         "entities.CreateTaskResponse": {
             "type": "object",
             "properties": {
-                "created_at": {
-                    "type": "string",
-                    "example": "2021-09-01T00:00:00Z"
-                },
                 "date": {
                     "type": "string",
                     "example": "2021-09-01T00:00:00Z"
@@ -874,8 +870,8 @@ var SwaggerInfo = &swag.Spec{
 	Host:             "localhost:8080",
 	BasePath:         "/",
 	Schemes:          []string{},
-	Title:            "Tech Exam Hugeman Assignment API",
-	Description:      "This is a sample Hugeman Assignment backend using Go and Swagger. The project serves as a backend API for managing tasks and users.",
+	Title:            "Task-Note API",
+	Description:      "This is a sample Task-Note backend using Go and Swagger. The project serves as a backend API for managing tasks and users.",
 	InfoInstanceName: "swagger",
 	SwaggerTemplate:  docTemplate,
 	LeftDelim:        "{{",

@@ -27,18 +27,17 @@ type CreateTaskResponse struct {
 	Description *string   `json:"description" example:"Description of task 1"`
 	Date        time.Time `json:"date" example:"2021-09-01T00:00:00Z"`
 	Image       *string   `json:"image" example:"fqfqf"`
-	CreatedAt   time.Time `json:"created_at" example:"2021-09-01T00:00:00Z"`
 }
 
 type GetTaskResponse struct {
-	ID          string    `json:"id" example:"123e4567-e89b-12d3-a456-426614174000"`
-	UserID      string    `json:"user_id" example:"123e4567-e89b-12d3-a456-426614174000"`
-	Title       string    `json:"title" example:"Task 1"`
-	Status      string    `json:"status" example:"IN_PROGRESS"`
-	Description *string   `json:"description" example:"Description of task 1"`
-	Date        time.Time `json:"date" example:"2021-09-01T00:00:00Z"`
-	Image       *string   `json:"image" example:"fqfqf"`
-	CreatedAt   time.Time `json:"created_at" example:"2021-09-01T00:00:00Z"`
+	ID          string  `json:"id" example:"123e4567-e89b-12d3-a456-426614174000"`
+	UserID      string  `json:"user_id" example:"123e4567-e89b-12d3-a456-426614174000"`
+	Title       string  `json:"title" example:"Task 1"`
+	Status      string  `json:"status" example:"IN_PROGRESS"`
+	Description *string `json:"description" example:"Description of task 1"`
+	Date        string  `json:"date" example:"2021-09-01T00:00:00Z"`
+	Image       *string `json:"image" example:"fqfqf"`
+	CreatedAt   string  `json:"created_at" example:"2021-09-01T00:00:00Z"`
 }
 
 type UpdateTaskRequest struct {
@@ -50,14 +49,14 @@ type UpdateTaskRequest struct {
 }
 
 type UpdateTaskResponse struct {
-	ID          string    `json:"id" example:"123e4567-e89b-12d3-a456-426614174000"`
-	UserID      string    `json:"user_id" example:"123e4567-e89b-12d3-a456-426614174000"`
-	Title       string    `json:"title" example:"Task 1"`
-	Status      string    `json:"status" example:"IN_PROGRESS"`
-	Description *string   `json:"description" example:"Description of task 1"`
-	Date        time.Time `json:"date" example:"2021-09-01T00:00:00Z"`
-	Image       *string   `json:"image" example:"fqfqf"`
-	CreatedAt   time.Time `json:"created_at" example:"2021-09-01T00:00:00Z"`
+	ID          string  `json:"id" example:"123e4567-e89b-12d3-a456-426614174000"`
+	UserID      string  `json:"user_id" example:"123e4567-e89b-12d3-a456-426614174000"`
+	Title       string  `json:"title" example:"Task 1"`
+	Status      string  `json:"status" example:"IN_PROGRESS"`
+	Description *string `json:"description" example:"Description of task 1"`
+	Date        string  `json:"date" example:"2021-09-01T00:00:00Z"`
+	Image       *string `json:"image" example:"fqfqf"`
+	CreatedAt   string  `json:"created_at" example:"2021-09-01T00:00:00Z"`
 }
 
 type GetAllTasksRequest struct {

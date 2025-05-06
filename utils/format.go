@@ -63,7 +63,7 @@ func ConvertFileHeaderToBase64(fileHeader *multipart.FileHeader) (string, error)
 	return base64Str, nil
 }
 
-func NowBangkok() time.Time {
-	loc, _ := time.LoadLocation("Asia/Bangkok")
-	return time.Now().In(loc)
+func FormatBangkokRFC3339(t time.Time) string {
+	loc, _ := time.LoadLocation(constants.CurrentTimeLocation)
+	return t.In(loc).Format("2006-01-02T15:04:05.000Z07:00")
 }
