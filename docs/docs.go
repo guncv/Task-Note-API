@@ -86,15 +86,17 @@ const docTemplate = `{
                     },
                     {
                         "type": "integer",
-                        "description": "Number of items per page (default 20)",
+                        "description": "Number of items per page",
                         "name": "limit",
-                        "in": "query"
+                        "in": "query",
+                        "required": true
                     },
                     {
                         "type": "integer",
-                        "description": "Offset (default 0)",
+                        "description": "Offset",
                         "name": "offset",
-                        "in": "query"
+                        "in": "query",
+                        "required": true
                     }
                 ],
                 "responses": {

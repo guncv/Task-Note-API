@@ -284,9 +284,6 @@ func (s *TaskService) GetAllTasks(ctx context.Context, req *entities.GetAllTasks
 	s.log.DebugWithID(ctx, "[Service: GetAllTasks] Auth payload: ", authPayload)
 
 	// Apply default values
-	if req.Limit == 0 {
-		req.Limit = 20
-	}
 	if req.Order == "" {
 		req.Order = "desc"
 	}

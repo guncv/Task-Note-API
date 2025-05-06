@@ -210,8 +210,8 @@ func (h *TaskController) DeleteTask(c *gin.Context) {
 // @Param search query string false "Search by title or description"
 // @Param sort_by query string false "Sort by field: title, created_at, status"
 // @Param order query string false "Order: asc or desc"
-// @Param limit query int false "Number of items per page (default 20)"
-// @Param offset query int false "Offset (default 0)"
+// @Param limit query int true "Number of items per page"
+// @Param offset query int true "Offset"
 // @Security BearerAuth
 // @Success 200 {object} entities.GetAllTasksResponse "Tasks retrieved successfully"
 // @Failure 400 {object} entities.ErrExampleInvalidRequest "Invalid query params"

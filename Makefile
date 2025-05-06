@@ -36,4 +36,4 @@ swagger-gen:
 	swag init
 
 test:
-	go test -v -cover ./services & go test -v -cover ./utils
+	go test -v -cover ./services

@@ -64,8 +64,8 @@ type GetAllTasksRequest struct {
 	Search string `form:"search" example:"Task 1"`
 	SortBy string `form:"sort_by" binding:"omitempty,oneof=title created_at status" example:"title"`
 	Order  string `form:"order" binding:"omitempty,oneof=asc desc" example:"asc"`
-	Limit  int    `form:"limit" binding:"omitempty,min=1,max=100" example:"10"`
-	Offset int    `form:"offset" binding:"omitempty,min=1" example:"0"`
+	Limit  int    `form:"limit" binding:"min=1,max=100" example:"10"`
+	Offset int    `form:"offset" binding:"min=1" example:"1"`
 }
 
 type GetAllTasksResponse struct {

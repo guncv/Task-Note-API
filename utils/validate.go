@@ -105,6 +105,18 @@ func ValidateGetAllTasksInput(input entities.GetAllTasksRequest) interface{} {
 		errs = append(errs, newFieldError("sort_by", "Sort by must be title, created_at, or status"))
 	}
 
+	if input.Limit < 1 {
+		errs = append(errs, newFieldError("limit", "Limit must be greater than 0"))
+	}
+
+	if input.Offset < 1 {
+		errs = append(errs, newFieldError("offset", "Offset must be greater than 0"))
+	}
+
+	if input.Limit > 100 {
+		errs = append(errs, newFieldError("limit", "Limit must not exceed 100"))
+	}
+
 	return returnIfErrors(errs)
 }
 
@@ -144,9 +156,15 @@ func isZeroTime(t time.Time) bool {
 }
 
 func isInvalidOrder(s string) bool {
+	if s == "" {
+		return false
+	}
 	return s != "asc" && s != "desc"
 }
 
 func isInvalidSortBy(s string) bool {
+	if s == "" {
+		return false
+	}
 	return s != "title" && s != "created_at" && s != "status"
 }

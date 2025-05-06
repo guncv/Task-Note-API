@@ -291,13 +291,15 @@ paths:
         in: query
         name: order
         type: string
-      - description: Number of items per page (default 20)
+      - description: Number of items per page
         in: query
         name: limit
+        required: true
         type: integer
-      - description: Offset (default 0)
+      - description: Offset
         in: query
         name: offset
+        required: true
         type: integer
       produces:
       - application/json
