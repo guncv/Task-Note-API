@@ -1,6 +1,5 @@
 ## 📝 Task-Note API
 
-````
 A secure, RESTful API for managing tasks, with full authentication using **Paseto**, structured via **Clean Architecture** in **Go (Gin)**. Supports file uploads, time zone–aware timestamps, custom errors, and Swagger-based documentation.
 
 ---
@@ -18,7 +17,6 @@ Login returns a token:
 {
   "token": "v2.local.eyJ..."
 }
-````
 
 Use in requests:
 
