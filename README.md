@@ -1,15 +1,6 @@
-Here's your fully enhanced `README.md`, now including:
-
-* ✅ **Paseto authentication** with header usage
-* ✅ **User & task endpoints**, request types, formats
-* ✅ **Custom error handling**
-* ✅ **Migration & mock data**
-* ✅ **Detailed project structure explanation**
-
----
+## 📝 Task-Note API
 
 ````markdown
-# 📝 Task Note API
 
 A secure, RESTful API for managing tasks, with full authentication using **Paseto**, structured via **Clean Architecture** in **Go (Gin)**. Supports file uploads, time zone–aware timestamps, custom errors, and Swagger-based documentation.
 
