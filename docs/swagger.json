@@ -20,16 +20,22 @@
     "paths": {
         "/api/v1/health": {
             "get": {
-                "description": "Returns status",
+                "description": "Returns status of the service",
                 "tags": [
                     "Health Check"
                 ],
                 "summary": "Health Check",
                 "responses": {
                     "200": {
-                        "description": "OK",
+                        "description": "Health check successful",
                         "schema": {
                             "$ref": "#/definitions/entities.GetHealthUserResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/entities.ErrExampleInternalError"
                         }
                     }
                 }
@@ -87,9 +93,27 @@
                 ],
                 "responses": {
                     "200": {
-                        "description": "OK",
+                        "description": "Tasks retrieved successfully",
                         "schema": {
                             "$ref": "#/definitions/entities.GetAllTasksResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid query params",
+                        "schema": {
+                            "$ref": "#/definitions/entities.ErrExampleInvalidRequest"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/entities.ErrExampleUnauthorized"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/entities.ErrExampleInternalError"
                         }
                     }
                 }
@@ -131,14 +155,14 @@
                     },
                     {
                         "type": "string",
-                        "description": "Date",
+                        "description": "Date (RFC3339 format)",
                         "name": "date",
                         "in": "formData",
                         "required": true
                     },
                     {
                         "type": "file",
-                        "description": "Image",
+                        "description": "Optional base64 image upload",
                         "name": "image",
                         "in": "formData"
                     }
@@ -148,6 +172,36 @@
                         "description": "OK",
                         "schema": {
                             "$ref": "#/definitions/entities.CreateTaskResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid request body",
+                        "schema": {
+                            "$ref": "#/definitions/entities.ErrExampleInvalidRequest"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/entities.ErrExampleUnauthorized"
+                        }
+                    },
+                    "404": {
+                        "description": "Task not found",
+                        "schema": {
+                            "$ref": "#/definitions/entities.ErrExampleTaskNotFound"
+                        }
+                    },
+                    "409": {
+                        "description": "Task already exists",
+                        "schema": {
+                            "$ref": "#/definitions/entities.ErrExampleTaskAlreadyExists"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/entities.ErrExampleInternalError"
                         }
                     }
                 }
@@ -182,6 +236,24 @@
                         "description": "OK",
                         "schema": {
                             "$ref": "#/definitions/entities.GetTaskResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/entities.ErrExampleUnauthorized"
+                        }
+                    },
+                    "404": {
+                        "description": "Task not found",
+                        "schema": {
+                            "$ref": "#/definitions/entities.ErrExampleTaskNotFound"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/entities.ErrExampleInternalError"
                         }
                     }
                 }
@@ -235,9 +307,39 @@
                 ],
                 "responses": {
                     "200": {
-                        "description": "OK",
+                        "description": "Task updated successfully",
                         "schema": {
                             "$ref": "#/definitions/entities.UpdateTaskResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid request body",
+                        "schema": {
+                            "$ref": "#/definitions/entities.ErrExampleInvalidRequest"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/entities.ErrExampleUnauthorized"
+                        }
+                    },
+                    "404": {
+                        "description": "Task not found",
+                        "schema": {
+                            "$ref": "#/definitions/entities.ErrExampleTaskNotFound"
+                        }
+                    },
+                    "409": {
+                        "description": "Task already exists",
+                        "schema": {
+                            "$ref": "#/definitions/entities.ErrExampleTaskAlreadyExists"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/entities.ErrExampleInternalError"
                         }
                     }
                 }
@@ -267,7 +369,77 @@
                 ],
                 "responses": {
                     "200": {
-                        "description": "OK"
+                        "description": "Task deleted successfully"
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/entities.ErrExampleUnauthorized"
+                        }
+                    },
+                    "404": {
+                        "description": "Task not found",
+                        "schema": {
+                            "$ref": "#/definitions/entities.ErrExampleTaskNotFound"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/entities.ErrExampleInternalError"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/users": {
+            "post": {
+                "description": "Register a new user with email and password",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Users"
+                ],
+                "summary": "Register a new user",
+                "parameters": [
+                    {
+                        "description": "Register request",
+                        "name": "registerRequest",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/entities.RegisterRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successfully registered user",
+                        "schema": {
+                            "$ref": "#/definitions/entities.RegisterResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid request body",
+                        "schema": {
+                            "$ref": "#/definitions/entities.ErrExampleInvalidRequest"
+                        }
+                    },
+                    "409": {
+                        "description": "User already exists",
+                        "schema": {
+                            "$ref": "#/definitions/entities.ErrExampleUserExists"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/entities.ErrExampleInternalError"
+                        }
                     }
                 }
             }
@@ -298,56 +470,34 @@
                 ],
                 "responses": {
                     "200": {
-                        "description": "OK",
+                        "description": "Successfully logged in user",
                         "schema": {
                             "$ref": "#/definitions/entities.LoginResponse"
                         }
                     },
                     "400": {
-                        "description": "Bad Request"
+                        "description": "Invalid request body",
+                        "schema": {
+                            "$ref": "#/definitions/entities.ErrExampleInvalidRequest"
+                        }
                     },
                     "401": {
-                        "description": "Unauthorized"
-                    },
-                    "500": {
-                        "description": "Internal Server Error"
-                    }
-                }
-            }
-        },
-        "/api/v1/users/register": {
-            "post": {
-                "description": "Register a new user with email and password",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Users"
-                ],
-                "summary": "Register a new user",
-                "parameters": [
-                    {
-                        "description": "Register request",
-                        "name": "registerRequest",
-                        "in": "body",
-                        "required": true,
+                        "description": "Password is incorrect",
                         "schema": {
-                            "$ref": "#/definitions/entities.RegisterRequest"
+                            "$ref": "#/definitions/entities.ErrExampleIncorrectPassword"
                         }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK"
                     },
-                    "400": {
-                        "description": "Bad Request"
+                    "404": {
+                        "description": "User not found",
+                        "schema": {
+                            "$ref": "#/definitions/entities.ErrExampleUserNotFound"
+                        }
                     },
                     "500": {
-                        "description": "Internal Server Error"
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/entities.ErrExampleInternalError"
+                        }
                     }
                 }
             }
@@ -358,25 +508,159 @@
             "type": "object",
             "properties": {
                 "created_at": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "2021-09-01T00:00:00Z"
+                },
+                "date": {
+                    "type": "string",
+                    "example": "2021-09-01T00:00:00Z"
                 },
                 "description": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "Description of task 1"
                 },
                 "id": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "123e4567-e89b-12d3-a456-426614174000"
                 },
                 "image": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "fqfqf"
                 },
                 "status": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "IN_PROGRESS"
                 },
                 "title": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "Task 1"
                 },
                 "user_id": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "123e4567-e89b-12d3-a456-426614174000"
+                }
+            }
+        },
+        "entities.ErrExampleIncorrectPassword": {
+            "type": "object",
+            "properties": {
+                "code": {
+                    "type": "integer",
+                    "example": 4002
+                },
+                "message": {
+                    "type": "string",
+                    "example": "password is incorrect"
+                }
+            }
+        },
+        "entities.ErrExampleInternalError": {
+            "type": "object",
+            "properties": {
+                "code": {
+                    "type": "integer",
+                    "example": 5000
+                },
+                "message": {
+                    "type": "string",
+                    "example": "internal server error"
+                }
+            }
+        },
+        "entities.ErrExampleInvalidRequest": {
+            "type": "object",
+            "properties": {
+                "code": {
+                    "type": "integer",
+                    "example": 2001
+                },
+                "details": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/entities.FieldError"
+                    }
+                },
+                "message": {
+                    "type": "string",
+                    "example": "invalid request body"
+                }
+            }
+        },
+        "entities.ErrExampleTaskAlreadyExists": {
+            "type": "object",
+            "properties": {
+                "code": {
+                    "type": "integer",
+                    "example": 3002
+                },
+                "message": {
+                    "type": "string",
+                    "example": "task already exists"
+                }
+            }
+        },
+        "entities.ErrExampleTaskNotFound": {
+            "type": "object",
+            "properties": {
+                "code": {
+                    "type": "integer",
+                    "example": 3001
+                },
+                "message": {
+                    "type": "string",
+                    "example": "task not found"
+                }
+            }
+        },
+        "entities.ErrExampleUnauthorized": {
+            "type": "object",
+            "properties": {
+                "code": {
+                    "type": "integer",
+                    "example": 1001
+                },
+                "message": {
+                    "type": "string",
+                    "example": "unauthorized"
+                }
+            }
+        },
+        "entities.ErrExampleUserExists": {
+            "type": "object",
+            "properties": {
+                "code": {
+                    "type": "integer",
+                    "example": 4003
+                },
+                "message": {
+                    "type": "string",
+                    "example": "user already exists"
+                }
+            }
+        },
+        "entities.ErrExampleUserNotFound": {
+            "type": "object",
+            "properties": {
+                "code": {
+                    "type": "integer",
+                    "example": 4001
+                },
+                "message": {
+                    "type": "string",
+                    "example": "user not found"
+                }
+            }
+        },
+        "entities.FieldError": {
+            "type": "object",
+            "properties": {
+                "field": {
+                    "type": "string",
+                    "example": "title"
+                },
+                "message": {
+                    "type": "string",
+                    "example": "Title is required"
                 }
             }
         },
@@ -390,7 +674,8 @@
                     }
                 },
                 "total": {
-                    "type": "integer"
+                    "type": "integer",
+                    "example": 1
                 }
             }
         },
@@ -398,7 +683,8 @@
             "type": "object",
             "properties": {
                 "status": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "Healthy"
                 }
             }
         },
@@ -406,25 +692,36 @@
             "type": "object",
             "properties": {
                 "created_at": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "2021-09-01T00:00:00Z"
+                },
+                "date": {
+                    "type": "string",
+                    "example": "2021-09-01T00:00:00Z"
                 },
                 "description": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "Description of task 1"
                 },
                 "id": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "123e4567-e89b-12d3-a456-426614174000"
                 },
                 "image": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "fqfqf"
                 },
                 "status": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "IN_PROGRESS"
                 },
                 "title": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "Task 1"
                 },
                 "user_id": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "123e4567-e89b-12d3-a456-426614174000"
                 }
             }
         },
@@ -436,11 +733,13 @@
             ],
             "properties": {
                 "email": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "john.doe@example.com"
                 },
                 "password": {
                     "type": "string",
-                    "minLength": 8
+                    "minLength": 8,
+                    "example": "password123"
                 }
             }
         },
@@ -448,7 +747,8 @@
             "type": "object",
             "properties": {
                 "token": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c"
                 }
             }
         },
@@ -462,17 +762,46 @@
             ],
             "properties": {
                 "email": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "john.doe@example.com"
                 },
                 "first_name": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "John"
                 },
                 "last_name": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "Doe"
                 },
                 "password": {
                     "type": "string",
-                    "minLength": 8
+                    "minLength": 8,
+                    "example": "password123"
+                }
+            }
+        },
+        "entities.RegisterResponse": {
+            "type": "object",
+            "properties": {
+                "email": {
+                    "type": "string",
+                    "example": "john.doe@example.com"
+                },
+                "first_name": {
+                    "type": "string",
+                    "example": "John"
+                },
+                "hash_password": {
+                    "type": "string",
+                    "example": "password123"
+                },
+                "id": {
+                    "type": "string",
+                    "example": "123e4567-e89b-12d3-a456-426614174000"
+                },
+                "last_name": {
+                    "type": "string",
+                    "example": "Doe"
                 }
             }
         },
@@ -480,25 +809,36 @@
             "type": "object",
             "properties": {
                 "created_at": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "2021-09-01T00:00:00Z"
+                },
+                "date": {
+                    "type": "string",
+                    "example": "2021-09-01T00:00:00Z"
                 },
                 "description": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "Description of task 1"
                 },
                 "id": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "123e4567-e89b-12d3-a456-426614174000"
                 },
                 "image": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "fqfqf"
                 },
                 "status": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "IN_PROGRESS"
                 },
                 "title": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "Task 1"
                 },
                 "user_id": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "123e4567-e89b-12d3-a456-426614174000"
                 }
             }
         }

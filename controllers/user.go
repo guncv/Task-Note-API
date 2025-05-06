@@ -30,16 +30,18 @@ func NewUserController(service services.IUserService, log *log.Logger) *UserCont
 // @Accept json
 // @Produce json
 // @Param registerRequest body entities.RegisterRequest true "Register request"
-// @Success 200
-// @Failure 400
-// @Failure 500
-// @Router /api/v1/users/register [post]
+// @Success 200 {object} entities.RegisterResponse "Successfully registered user"
+// @Failure 400 {object} entities.ErrExampleInvalidRequest "Invalid request body"
+// @Failure 409 {object} entities.ErrExampleUserExists "User already exists"
+// @Failure 500 {object} entities.ErrExampleInternalError "Internal server error"
+// @Router /api/v1/users [post]
 func (c *UserController) Register(ctx *gin.Context) {
 	c.log.DebugWithID(ctx, "[Controller: Register] Called")
 	var req entities.RegisterRequest
 	if err := ctx.ShouldBindJSON(&req); err != nil {
 		c.log.ErrorWithID(ctx, "[Controller: Register] Failed to bind request: ", err)
-		utils.ErrorResponse(ctx, constants.ErrInvalidRequestBody)
+		detail := utils.ValidateRegisterInput(req)
+		utils.ErrorResponse(ctx, constants.ErrInvalidRequestBody, detail)
 		return
 	}
 
@@ -60,17 +62,19 @@ func (c *UserController) Register(ctx *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param loginRequest body entities.LoginRequest true "Login request"
-// @Success 200 {object} entities.LoginResponse
-// @Failure 400
-// @Failure 401
-// @Failure 500
+// @Success 200 {object} entities.LoginResponse "Successfully logged in user"
+// @Failure 400 {object} entities.ErrExampleInvalidRequest "Invalid request body"
+// @Failure 401 {object} entities.ErrExampleIncorrectPassword "Password is incorrect"
+// @Failure 404 {object} entities.ErrExampleUserNotFound "User not found"
+// @Failure 500 {object} entities.ErrExampleInternalError "Internal server error"
 // @Router /api/v1/users/login [post]
 func (c *UserController) Login(ctx *gin.Context) {
 	c.log.DebugWithID(ctx, "[Controller: Login] Called")
 	var req entities.LoginRequest
 	if err := ctx.ShouldBindJSON(&req); err != nil {
+		detail := utils.ValidateLoginInput(req)
 		c.log.ErrorWithID(ctx, "[Controller: Login] Failed to bind request: ", err)
-		utils.ErrorResponse(ctx, constants.ErrInvalidRequestBody)
+		utils.ErrorResponse(ctx, constants.ErrInvalidRequestBody, detail)
 		return
 	}
 

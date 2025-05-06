@@ -3,7 +3,6 @@ package services
 import (
 	"context"
 	"errors"
-	"time"
 
 	"github.com/google/uuid"
 	constants "github.com/guncv/tech-exam-software-engineering/constant"
@@ -76,13 +75,6 @@ func (s *TaskService) CreateTask(ctx context.Context, req *entities.CreateTaskRe
 		}
 	}
 
-	// Get current time
-	currentTime, err := utils.GetCurrentTimeWithRFC3339()
-	if err != nil {
-		s.log.ErrorWithID(ctx, "[Service: CreateTask] Failed to get current time", err)
-		return nil, err
-	}
-
 	// Create task
 	arg := &models.Task{
 		ID:          uuid.New(),
@@ -90,9 +82,11 @@ func (s *TaskService) CreateTask(ctx context.Context, req *entities.CreateTaskRe
 		Title:       req.Title,
 		Status:      string(req.Status),
 		Image:       &base64Image,
+		Date:        req.Date,
 		Description: req.Description,
-		CreatedAt:   currentTime,
+		CreatedAt:   utils.NowBangkok(),
 	}
+	s.log.DebugWithID(ctx, "[Service: CreateTask] Task: ", arg)
 
 	// Create task in repository
 	if err := s.repo.CreateTask(ctx, arg); err != nil {
@@ -113,9 +107,10 @@ func (s *TaskService) CreateTask(ctx context.Context, req *entities.CreateTaskRe
 		UserID:      arg.UserID,
 		Title:       arg.Title,
 		Status:      arg.Status,
+		Date:        arg.Date,
 		Image:       arg.Image,
 		Description: arg.Description,
-		CreatedAt:   arg.CreatedAt.Format(time.RFC3339),
+		CreatedAt:   arg.CreatedAt,
 	}
 
 	s.log.DebugWithID(ctx, "[Service: CreateTask] Task created successfully", resp)
@@ -137,7 +132,7 @@ func (s *TaskService) GetTask(ctx context.Context, req string) (*entities.GetTas
 	repoResponse, err := s.repo.GetTask(ctx, req)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
-			s.log.ErrorWithID(ctx, "[Service: UpdateTask] Task not found: ", err)
+			s.log.ErrorWithID(ctx, "[Service: GetTask] Task not found: ", err)
 			return nil, constants.ErrTaskNotFound
 		}
 
@@ -158,8 +153,9 @@ func (s *TaskService) GetTask(ctx context.Context, req string) (*entities.GetTas
 		Title:       repoResponse.Title,
 		Status:      repoResponse.Status,
 		Image:       repoResponse.Image,
+		Date:        repoResponse.Date,
 		Description: repoResponse.Description,
-		CreatedAt:   repoResponse.CreatedAt.Format(time.RFC3339),
+		CreatedAt:   repoResponse.CreatedAt,
 	}
 
 	s.log.DebugWithID(ctx, "[Service: GetTask] Task retrieved successfully", resp)
@@ -204,6 +200,9 @@ func (s *TaskService) UpdateTask(ctx context.Context, id string, req *entities.U
 	if req.Status != "" {
 		existingTask.Status = string(req.Status)
 	}
+	if !req.Date.IsZero() {
+		existingTask.Date = req.Date
+	}
 	if req.Image != nil {
 		base64Image, err := utils.ConvertFileHeaderToBase64(req.Image)
 		if err != nil {
@@ -225,9 +224,10 @@ func (s *TaskService) UpdateTask(ctx context.Context, id string, req *entities.U
 		UserID:      existingTask.UserID,
 		Title:       existingTask.Title,
 		Status:      existingTask.Status,
+		Date:        existingTask.Date,
 		Image:       existingTask.Image,
 		Description: existingTask.Description,
-		CreatedAt:   existingTask.CreatedAt.Format(time.RFC3339),
+		CreatedAt:   existingTask.CreatedAt,
 	}
 
 	s.log.DebugWithID(ctx, "[Service: UpdateTask] Task updated successfully", resp)
@@ -313,8 +313,9 @@ func (s *TaskService) GetAllTasks(ctx context.Context, req *entities.GetAllTasks
 			Title:       t.Title,
 			Description: t.Description,
 			Image:       t.Image,
+			Date:        t.Date,
 			Status:      t.Status,
-			CreatedAt:   t.CreatedAt.Format(time.RFC3339),
+			CreatedAt:   t.CreatedAt,
 		})
 	}
 

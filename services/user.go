@@ -44,6 +44,7 @@ func NewUserService(
 
 func (s *UserService) RegisterUser(ctx context.Context, req *entities.RegisterRequest) (*entities.RegisterResponse, error) {
 	s.log.DebugWithID(ctx, "[Service: RegisterUser] Called")
+	// Hash password
 	hashedPassword, err := utils.HashPassword(ctx, req.Password, s.log)
 	if err != nil {
 		s.log.ErrorWithID(ctx, "[Service: RegisterUser] Failed to hash password: ", err)
@@ -58,6 +59,7 @@ func (s *UserService) RegisterUser(ctx context.Context, req *entities.RegisterRe
 		LastName:  req.LastName,
 	}
 
+	// Register user
 	if err = s.repo.RegisterUser(ctx, &arg); err != nil {
 		if strings.Contains(err.Error(), "duplicate key value violates unique constraint") {
 			s.log.ErrorWithID(ctx, "[Service: RegisterUser] Duplicate user", err)
@@ -68,6 +70,7 @@ func (s *UserService) RegisterUser(ctx context.Context, req *entities.RegisterRe
 		return nil, err
 	}
 
+	// Response
 	resp := entities.RegisterResponse{
 		Id:           arg.ID.String(),
 		FirstName:    arg.FirstName,
@@ -83,6 +86,7 @@ func (s *UserService) RegisterUser(ctx context.Context, req *entities.RegisterRe
 func (s *UserService) LoginUser(ctx context.Context, req *entities.LoginRequest) (*entities.LoginResponse, error) {
 	s.log.DebugWithID(ctx, "[Service: LoginUser] Called")
 
+	// Get user
 	user, err := s.repo.GetUser(ctx, req.Email)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
@@ -93,11 +97,13 @@ func (s *UserService) LoginUser(ctx context.Context, req *entities.LoginRequest)
 		return nil, err
 	}
 
+	// Check password
 	if err = utils.CheckPassword(ctx, req.Password, user.Password, s.log); err != nil {
 		s.log.ErrorWithID(ctx, "[Service: LoginUser] Failed to check password: ", err)
 		return nil, constants.ErrPasswordIncorrect
 	}
 
+	// Create token
 	accessToken, err := s.tokenMaker.CreateToken(
 		user.ID.String(),
 		s.config.TokenConfig.AccessTokenDuration,
@@ -107,6 +113,7 @@ func (s *UserService) LoginUser(ctx context.Context, req *entities.LoginRequest)
 		return nil, err
 	}
 
+	// Response
 	response := entities.LoginResponse{
 		Token: accessToken,
 	}

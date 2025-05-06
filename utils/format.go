@@ -13,7 +13,7 @@ import (
 	"github.com/guncv/tech-exam-software-engineering/entities"
 )
 
-func ErrorResponse(ctx *gin.Context, err error) {
+func ErrorResponse(ctx *gin.Context, err error, details ...interface{}) {
 	statusCode, ok := constants.ErrorMapWithStatusCode[err]
 	if !ok {
 		statusCode = http.StatusInternalServerError
@@ -24,10 +24,16 @@ func ErrorResponse(ctx *gin.Context, err error) {
 		code = constants.CodeInternalServerError
 	}
 
+	var detail interface{}
+	if len(details) > 0 {
+		detail = details[0]
+	}
+
 	ctx.JSON(statusCode, gin.H{
 		"error": entities.ErrorResponse{
 			Code:    int(code),
 			Message: err.Error(),
+			Details: detail,
 		},
 	})
 }
@@ -57,22 +63,7 @@ func ConvertFileHeaderToBase64(fileHeader *multipart.FileHeader) (string, error)
 	return base64Str, nil
 }
 
-func GetCurrentTimeWithRFC3339() (time.Time, error) {
-	loc, err := time.LoadLocation(constants.CurrentTimeLocation)
-	if err != nil {
-		return time.Time{}, constants.ErrGetCurrentTimeWithRFC3339
-	}
-
-	now := time.Now().In(loc)
-
-	return now, nil
+func NowBangkok() time.Time {
+	loc, _ := time.LoadLocation("Asia/Bangkok")
+	return time.Now().In(loc)
 }
-
-// func CheckUUIDType(uuid string) bool {
-// 	_, err := uuid.Parse(uuid)
-// 	if err != nil {
-// 		return false
-// 	}
-// 	return true
-
-// }

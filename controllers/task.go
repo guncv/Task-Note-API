@@ -25,8 +25,9 @@ func NewTaskController(service services.ITaskService, log *log.Logger) *TaskCont
 
 // @Tags Health Check
 // @Summary Health Check
-// @Description Returns status
-// @Success 200 {object} entities.GetHealthUserResponse
+// @Description Returns status of the service
+// @Success 200 {object} entities.GetHealthUserResponse "Health check successful"
+// @Failure 500 {object} entities.ErrExampleInternalError "Internal server error"
 // @Router /api/v1/health [get]
 // HealthCheck handles the health check endpoint
 func (h *TaskController) HealthCheck(c *gin.Context) {
@@ -50,10 +51,15 @@ func (h *TaskController) HealthCheck(c *gin.Context) {
 // @Param title formData string true "Title"
 // @Param description formData string false "Description"
 // @Param status formData string true "Status"
-// @Param date formData string true "Date"
-// @Param image formData file false "Image"
+// @Param date formData string true "Date (RFC3339 format)"
+// @Param image formData file false "Optional base64 image upload"
 // @Security BearerAuth
 // @Success 200 {object} entities.CreateTaskResponse
+// @Failure 400 {object} entities.ErrExampleInvalidRequest "Invalid request body"
+// @Failure 401 {object} entities.ErrExampleUnauthorized "Unauthorized"
+// @Failure 409 {object} entities.ErrExampleTaskAlreadyExists "Task already exists"
+// @Failure 404 {object} entities.ErrExampleTaskNotFound "Task not found"
+// @Failure 500 {object} entities.ErrExampleInternalError "Internal server error"
 // @Router /api/v1/tasks [post]
 func (h *TaskController) CreateTask(c *gin.Context) {
 	ctx := c.Request.Context()
@@ -62,8 +68,9 @@ func (h *TaskController) CreateTask(c *gin.Context) {
 	var req entities.CreateTaskRequest
 	// Bind request
 	if err := c.ShouldBind(&req); err != nil {
+		detail := utils.ValidateCreateTaskInput(req)
 		h.log.ErrorWithID(ctx, "[Controller: CreateTask]: Failed to bind request", err)
-		utils.ErrorResponse(c, constants.ErrInvalidRequestBody)
+		utils.ErrorResponse(c, constants.ErrInvalidRequestBody, detail)
 		return
 	}
 
@@ -86,6 +93,9 @@ func (h *TaskController) CreateTask(c *gin.Context) {
 // @Param id path string true "Task ID"
 // @Security BearerAuth
 // @Success 200 {object} entities.GetTaskResponse
+// @Failure 401 {object} entities.ErrExampleUnauthorized "Unauthorized"
+// @Failure 404 {object} entities.ErrExampleTaskNotFound "Task not found"
+// @Failure 500 {object} entities.ErrExampleInternalError "Internal server error"
 // @Router /api/v1/tasks/{id} [get]
 func (h *TaskController) GetTask(c *gin.Context) {
 	ctx := c.Request.Context()
@@ -120,7 +130,12 @@ func (h *TaskController) GetTask(c *gin.Context) {
 // @Param status formData string false "Status"
 // @Param image formData file false "Image"
 // @Security BearerAuth
-// @Success 200 {object} entities.UpdateTaskResponse
+// @Success 200 {object} entities.UpdateTaskResponse "Task updated successfully"
+// @Failure 400 {object} entities.ErrExampleInvalidRequest "Invalid request body"
+// @Failure 401 {object} entities.ErrExampleUnauthorized "Unauthorized"
+// @Failure 404 {object} entities.ErrExampleTaskNotFound "Task not found"
+// @Failure 409 {object} entities.ErrExampleTaskAlreadyExists "Task already exists"
+// @Failure 500 {object} entities.ErrExampleInternalError "Internal server error"
 // @Router /api/v1/tasks/{id} [put]
 func (h *TaskController) UpdateTask(c *gin.Context) {
 	ctx := c.Request.Context()
@@ -136,8 +151,9 @@ func (h *TaskController) UpdateTask(c *gin.Context) {
 	// Bind request
 	var req entities.UpdateTaskRequest
 	if err := c.ShouldBind(&req); err != nil {
+		detail := utils.ValidateUpdateTaskInput(req)
 		h.log.ErrorWithID(ctx, "[Controller: UpdateTask]: Failed to bind request", err)
-		utils.ErrorResponse(c, constants.ErrInvalidRequestBody)
+		utils.ErrorResponse(c, constants.ErrInvalidRequestBody, detail)
 		return
 	}
 
@@ -159,7 +175,10 @@ func (h *TaskController) UpdateTask(c *gin.Context) {
 // @Accept json
 // @Param id path string true "Task ID"
 // @Security BearerAuth
-// @Success 200
+// @Success 200 {object} nil "Task deleted successfully"
+// @Failure 401 {object} entities.ErrExampleUnauthorized "Unauthorized"
+// @Failure 404 {object} entities.ErrExampleTaskNotFound "Task not found"
+// @Failure 500 {object} entities.ErrExampleInternalError "Internal server error"
 // @Router /api/v1/tasks/{id} [delete]
 func (h *TaskController) DeleteTask(c *gin.Context) {
 	ctx := c.Request.Context()
@@ -194,7 +213,10 @@ func (h *TaskController) DeleteTask(c *gin.Context) {
 // @Param limit query int false "Number of items per page (default 20)"
 // @Param offset query int false "Offset (default 0)"
 // @Security BearerAuth
-// @Success 200 {object} entities.GetAllTasksResponse
+// @Success 200 {object} entities.GetAllTasksResponse "Tasks retrieved successfully"
+// @Failure 400 {object} entities.ErrExampleInvalidRequest "Invalid query params"
+// @Failure 401 {object} entities.ErrExampleUnauthorized "Unauthorized"
+// @Failure 500 {object} entities.ErrExampleInternalError "Internal server error"
 // @Router /api/v1/tasks [get]
 func (h *TaskController) GetAllTasks(c *gin.Context) {
 	ctx := c.Request.Context()
@@ -202,8 +224,9 @@ func (h *TaskController) GetAllTasks(c *gin.Context) {
 
 	var req entities.GetAllTasksRequest
 	if err := c.ShouldBindQuery(&req); err != nil {
+		detail := utils.ValidateGetAllTasksInput(req)
 		h.log.ErrorWithID(ctx, "[Controller: GetAllTasks]: Invalid query params", err)
-		utils.ErrorResponse(c, constants.ErrInvalidQueryRequestParam)
+		utils.ErrorResponse(c, constants.ErrInvalidQueryRequestParam, detail)
 		return
 	}
 
