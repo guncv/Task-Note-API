@@ -8,7 +8,7 @@ A secure, RESTful API for managing tasks, with full authentication using **Paset
 
 All **task-related endpoints** are protected with Paseto.
 
-1. **Register** → `/api/v1/users/register`
+1. **Register** → `/api/v1/users`
 2. **Login** → `/api/v1/users/login`
 
 Login returns a token:
@@ -31,7 +31,7 @@ Authorization: Bearer {token}
 
 | Method | Endpoint                 | Description         | Request Body (JSON)                        |
 |--------|--------------------------|---------------------|--------------------------------------------|
-| POST   | `/api/v1/users/register` | Register a new user | `email`, `password`, `first_name`, `last_name` |
+| POST   | `/api/v1/users` | Register a new user | `email`, `password`, `first_name`, `last_name` |
 | POST   | `/api/v1/users/login`    | Login and get token | `email`, `password`                        |
 
 ---
