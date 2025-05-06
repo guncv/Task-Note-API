@@ -17,6 +17,7 @@ Login returns a token:
 {
   "token": "v2.local.eyJ..."
 }
+```
 
 Use in requests:
 
